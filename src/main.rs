@@ -10,6 +10,7 @@ struct Commit {
 }
 
 fn main() {
+    let mut cached_files: Vec<String> = vec![];
     let args: Vec<String> = args().collect();
     let mut from_sha = "main";
 
@@ -35,9 +36,15 @@ fn main() {
             continue;
         }
 
+        for file in &changed_files {
+            if !cached_files.contains(&file) {
+                cached_files.push(file.to_string());
+            }
+        }
+
         checkout(&commit_pair[1].sha);
 
-        run_tests(changed_files);
+        run_tests(&cached_files);
 
         checkout(&"-".to_string());
 
@@ -99,10 +106,10 @@ fn checkout(value: &String) {
         .expect("error");
 }
 
-fn run_tests(changed_files: Vec<String>) {
+fn run_tests(cached_files: &Vec<String>) {
     let test_runner_command = Command::new("bundle")
         .args(["exec", "rspec"])
-        .args(&changed_files)
+        .args(cached_files)
         .output()
         .expect("error");
 
