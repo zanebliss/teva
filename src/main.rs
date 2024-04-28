@@ -106,6 +106,20 @@ fn switch(value: &String) {
         .expect("error");
 }
 
+fn create_worktree() {
+    Command::new("git")
+        .args(["worktree", "add", "-d",  "gitavs-worktree"])
+        .output()
+        .expect("error");
+}
+
+fn delete_worktree() {
+    Command::new("git")
+        .args(["worktree", "remove", "gitavs-worktree"])
+        .output()
+        .expect("error");
+}
+
 fn run_tests(cached_files: &Vec<String>) {
     let test_runner_command = Command::new("bundle")
         .args(["exec", "rspec"])
