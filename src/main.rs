@@ -18,6 +18,13 @@ fn main() {
         from_sha = &args[1];
     }
 
+    create_worktree();
+
+    Command::new("cd")
+        .arg("gitavs-workree")
+        .output()
+        .expect("error");
+
     let commits: Vec<Commit> = get_commits(from_sha.to_string());
 
     for commit_pair in commits.windows(2) {
@@ -44,12 +51,20 @@ fn main() {
 
         switch(&commit_pair[1].sha);
 
+        for file in &changed_files {
+            if !cached_files.contains(&file) {
+                cached_files.push(file.to_string());
+            }
+        }
+
         run_tests(&cached_files);
 
         switch(&"-".to_string());
 
         print!("\n");
     }
+
+    delete_worktree();
 }
 
 fn get_commits(from_sha: String) -> Vec<Commit> {
