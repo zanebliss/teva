@@ -2,6 +2,7 @@ use colored::Colorize;
 use std::io::{self, BufRead, BufReader, Write};
 use std::process::{Command, Stdio};
 
+const GIT: &str = "git";
 const WORKTREE_DIR: &str = "gitavs-worktree";
 
 use crate::runners::tests;
@@ -80,7 +81,7 @@ pub fn do_work(from_sha: String, mut cached_files: Vec<String>) {
 }
 
 fn get_commits(from_sha: String) -> Vec<Commit> {
-    let child = match Command::new("git")
+    let child = match Command::new(GIT)
         .args([Subcommand::Log.build(), &format!("{from_sha}^.."), "--reverse", "--format=%h %s"])
         .stdout(Stdio::piped())
         .spawn() {
@@ -108,7 +109,7 @@ fn get_commits(from_sha: String) -> Vec<Commit> {
 }
 
 fn get_changed_files(sha_1: &String, sha_2: &String) -> Vec<String> {
-    let child = match Command::new("git")
+    let child = match Command::new(GIT)
         .args([Subcommand::Diff.build(), "--name-only", &sha_1, &sha_2])
         .stdout(Stdio::piped())
         .spawn() {
@@ -135,7 +136,7 @@ fn get_changed_files(sha_1: &String, sha_2: &String) -> Vec<String> {
 }
 
 fn switch(value: &String) {
-    match Command::new("git")
+    match Command::new(GIT)
         .args([Subcommand::Switch.build(), &format!("{}", value)])
         .output() {
             Ok(_) => (),
@@ -147,7 +148,7 @@ fn switch(value: &String) {
 }
 
 fn create_worktree() {
-    match Command::new("git")
+    match Command::new(GIT)
         .args([Subcommand::Worktree.build(), "add", "-d",  WORKTREE_DIR])
         .output() {
             Ok(_) => (),
@@ -159,7 +160,7 @@ fn create_worktree() {
 }
 
 fn delete_worktree() {
-    match Command::new("git")
+    match Command::new(GIT)
         .args([Subcommand::Worktree.build(), "remove", WORKTREE_DIR])
         .output() {
             Ok(_) => (),
