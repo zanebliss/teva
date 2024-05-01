@@ -14,6 +14,7 @@ struct Commit {
 }
 
 enum Subcommand {
+    Branch,
     Diff,
     Log,
     Switch,
@@ -23,6 +24,7 @@ enum Subcommand {
 impl Subcommand {
     fn build(&self) -> &str {
         match self {
+            Subcommand::Branch => "branch",
             Subcommand::Log => "log",
             Subcommand::Diff => "diff",
             Subcommand::Switch => "switch",
@@ -32,6 +34,8 @@ impl Subcommand {
 }
 
 pub fn do_work(from_sha: String, mut cached_files: Vec<String>) {
+    let starting_branch = get_starting_branch();
+
     create_worktree();
 
     match Command::new("cd")
@@ -78,6 +82,7 @@ pub fn do_work(from_sha: String, mut cached_files: Vec<String>) {
     }
 
     delete_worktree();
+    switch(&starting_branch);
 }
 
 fn get_commits(from_sha: String) -> Vec<Commit> {
@@ -133,6 +138,20 @@ fn get_changed_files(sha_1: &String, sha_2: &String) -> Vec<String> {
                 .collect()
         })
         .unwrap_or_default()
+}
+
+fn get_starting_branch() -> String {
+    let output = match Command::new(GIT)
+        .args([Subcommand::Branch.build(), "--show-current"])
+        .output() {
+            Ok(val) => val,
+            Err(err) => {
+                eprintln!("Error getting current branch: {}", err);
+                std::process::exit(1);
+            }
+        };
+
+    String::from_utf8(output.stdout).expect("Couldn't get starting branch!")
 }
 
 fn switch(value: &String) {
