@@ -14,20 +14,18 @@ struct Commit {
 }
 
 enum Subcommand {
-    Branch,
     Diff,
     Log,
-    Switch,
+    Checkout,
     Worktree,
 }
 
 impl Subcommand {
     fn build(&self) -> &str {
         match self {
-            Subcommand::Branch => "branch",
             Subcommand::Log => "log",
             Subcommand::Diff => "diff",
-            Subcommand::Switch => "switch",
+            Subcommand::Checkout => "checkout",
             Subcommand::Worktree => "worktree",
         }
     }
@@ -68,11 +66,11 @@ pub fn do_work(from_sha: String, mut cached_files: Vec<String>) {
             }
         }
 
-        switch(&commit_pair[1].sha);
+        checkout(&commit_pair[1].sha);
 
         tests::rspec::run(&cached_files);
 
-        switch(&"-".to_string());
+        checkout(&"-".to_string());
 
         print!("\n");
     }
@@ -137,9 +135,9 @@ fn get_changed_files(sha_1: &String, sha_2: &String) -> Vec<String> {
         .unwrap_or_default()
 }
 
-fn switch(value: &String) {
+fn checkout(value: &String) {
     match Command::new(GIT)
-        .args([Subcommand::Switch.build(), &format!("{}", value)])
+        .args([Subcommand::Checkout.build(), &format!("{}", value)])
         .output()
     {
         Ok(_) => (),
