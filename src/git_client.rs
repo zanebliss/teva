@@ -14,19 +14,21 @@ struct Commit {
 }
 
 enum Subcommand {
+    Branch,
     Diff,
     Log,
     Switch,
-    Worktree
+    Worktree,
 }
 
 impl Subcommand {
     fn build(&self) -> &str {
         match self {
+            Subcommand::Branch => "branch",
             Subcommand::Log => "log",
             Subcommand::Diff => "diff",
             Subcommand::Switch => "switch",
-            Subcommand::Worktree => "worktree"
+            Subcommand::Worktree => "worktree",
         }
     }
 }
@@ -34,15 +36,13 @@ impl Subcommand {
 pub fn do_work(from_sha: String, mut cached_files: Vec<String>) {
     create_worktree();
 
-    match Command::new("cd")
-        .arg(WORKTREE_DIR)
-        .output() {
-            Ok(_) => (),
-            Err(err) => {
-                eprintln!("Could not cd: {}", err);
-                std::process::exit(-1);
-            }
+    match Command::new("cd").arg(WORKTREE_DIR).output() {
+        Ok(_) => (),
+        Err(err) => {
+            eprintln!("Could not cd: {}", err);
+            std::process::exit(-1);
         }
+    }
 
     let commits: Vec<Commit> = get_commits(from_sha);
 
@@ -82,43 +82,48 @@ pub fn do_work(from_sha: String, mut cached_files: Vec<String>) {
 
 fn get_commits(from_sha: String) -> Vec<Commit> {
     let child = match Command::new(GIT)
-        .args([Subcommand::Log.build(), &format!("{from_sha}^.."), "--reverse", "--format=%h %s"])
+        .args([
+            Subcommand::Log.build(),
+            &format!("{from_sha}^.."),
+            "--reverse",
+            "--format=%h %s",
+        ])
         .stdout(Stdio::piped())
-        .spawn() {
-            Ok(child) => child,
-            Err(err) => {
-                eprintln!("Error spawning process: {}", err);
-                std::process::exit(1);
-            }
-        };
-
-    match child
-        .stdout
-        .map(|stdout| {
-            BufReader::new(stdout)
-                .lines()
-                .map(|line| build_commit(line))
-                .collect::<Vec<Commit>>()
-        }) {
-            Some(val) => val,
-            None => {
-                eprintln!("No commit returned?");
-                Vec::new()
-            }
+        .spawn()
+    {
+        Ok(child) => child,
+        Err(err) => {
+            eprintln!("Error spawning process: {}", err);
+            std::process::exit(1);
         }
+    };
+
+    match child.stdout.map(|stdout| {
+        BufReader::new(stdout)
+            .lines()
+            .map(|line| build_commit(line))
+            .collect::<Vec<Commit>>()
+    }) {
+        Some(val) => val,
+        None => {
+            eprintln!("No commit returned?");
+            Vec::new()
+        }
+    }
 }
 
 fn get_changed_files(sha_1: &String, sha_2: &String) -> Vec<String> {
     let child = match Command::new(GIT)
         .args([Subcommand::Diff.build(), "--name-only", &sha_1, &sha_2])
         .stdout(Stdio::piped())
-        .spawn() {
-            Ok(child) => child,
-            Err(err) => {
-                eprintln!("Error spawning process: {}", err);
-                std::process::exit(1);
-            }
-        };
+        .spawn()
+    {
+        Ok(child) => child,
+        Err(err) => {
+            eprintln!("Error spawning process: {}", err);
+            std::process::exit(1);
+        }
+    };
 
     child
         .stdout
@@ -126,10 +131,7 @@ fn get_changed_files(sha_1: &String, sha_2: &String) -> Vec<String> {
             BufReader::new(stdout)
                 .lines()
                 .map(|line| line.expect("error"))
-                .filter(|line| { 
-                    line.ends_with("_spec.rb") ||
-                    line.ends_with("_test.rb")
-                })
+                .filter(|line| line.ends_with("_spec.rb") || line.ends_with("_test.rb"))
                 .collect()
         })
         .unwrap_or_default()
@@ -138,37 +140,40 @@ fn get_changed_files(sha_1: &String, sha_2: &String) -> Vec<String> {
 fn switch(value: &String) {
     match Command::new(GIT)
         .args([Subcommand::Switch.build(), &format!("{}", value)])
-        .output() {
-            Ok(_) => (),
-            Err(err) => {
-                eprintln!("Failed to switch: {}", err);
-                std::process::exit(-1);
-            }
+        .output()
+    {
+        Ok(_) => (),
+        Err(err) => {
+            eprintln!("Failed to switch: {}", err);
+            std::process::exit(-1);
         }
+    }
 }
 
 fn create_worktree() {
     match Command::new(GIT)
-        .args([Subcommand::Worktree.build(), "add", "-d",  WORKTREE_DIR])
-        .output() {
-            Ok(_) => (),
-            Err(err) => {
-                eprintln!("Failed to add worktree: {}", err);
-                std::process::exit(-1);
-            }
+        .args([Subcommand::Worktree.build(), "add", "-d", WORKTREE_DIR])
+        .output()
+    {
+        Ok(_) => (),
+        Err(err) => {
+            eprintln!("Failed to add worktree: {}", err);
+            std::process::exit(-1);
         }
+    }
 }
 
 fn delete_worktree() {
     match Command::new(GIT)
         .args([Subcommand::Worktree.build(), "remove", WORKTREE_DIR])
-        .output() {
-            Ok(_) => (),
-            Err(err) => {
-                eprintln!("Failed to remove worktree: {}", err);
-                std::process::exit(-1);
-            }
+        .output()
+    {
+        Ok(_) => (),
+        Err(err) => {
+            eprintln!("Failed to remove worktree: {}", err);
+            std::process::exit(-1);
         }
+    }
 }
 
 fn build_commit<E>(line: Result<String, E>) -> Commit {
