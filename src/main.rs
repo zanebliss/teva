@@ -1,4 +1,5 @@
 use colored::Colorize;
+use std::env::args;
 use std::io::{self, BufRead, BufReader, Write};
 use std::process::{Command, Stdio};
 
@@ -9,7 +10,14 @@ struct Commit {
 }
 
 fn main() {
-    let commits: Vec<Commit> = get_commits();
+    let args: Vec<String> = args().collect();
+    let mut from_sha = "main";
+
+    if args.len() > 1 {
+        from_sha = &args[1];
+    }
+
+    let commits: Vec<Commit> = get_commits(from_sha.to_string());
 
     for commit_pair in commits.windows(2) {
         print!(
@@ -37,9 +45,9 @@ fn main() {
     }
 }
 
-fn get_commits() -> Vec<Commit> {
+fn get_commits(from_sha: String) -> Vec<Commit> {
     let child = Command::new("git")
-        .args(["log", "main^..", "--reverse", "--format=%h %s"])
+        .args(["log", &format!("{from_sha}^.."), "--reverse", "--format=%h %s"])
         .stdout(Stdio::piped())
         .spawn()
         .expect("error");
