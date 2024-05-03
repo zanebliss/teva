@@ -24,13 +24,9 @@ fn print_logo() {
 }
 
 fn main() {
-    let cached_files: Vec<String> = vec![];
     let cli = Cli::parse();
 
     print_logo();
 
-    git_client::do_work(
-        String::from(cli.from_sha.as_deref().unwrap_or("main")),
-        cached_files,
-    )
+    git_client::do_work(String::from(cli.from_sha.as_deref().unwrap_or("main")))
 }

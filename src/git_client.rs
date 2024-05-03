@@ -31,7 +31,9 @@ impl Subcommand {
     }
 }
 
-pub fn do_work(from_sha: String, mut cached_files: Vec<String>) {
+pub fn do_work(from_sha: String) {
+    let mut cached_files: Vec<String> = vec![];
+
     create_worktree();
 
     match Command::new("cd").arg(format!("../{WORKTREE_DIR}")).output() {
