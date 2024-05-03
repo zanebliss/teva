@@ -21,7 +21,7 @@ enum Subcommand {
 }
 
 impl Subcommand {
-    fn build(&self) -> &str {
+    fn to_string(&self) -> &str {
         match self {
             Subcommand::Log => "log",
             Subcommand::Diff => "diff",
@@ -81,7 +81,7 @@ pub fn do_work(from_sha: String, mut cached_files: Vec<String>) {
 fn get_commits(from_sha: String) -> Vec<Commit> {
     let child = match Command::new(GIT)
         .args([
-            Subcommand::Log.build(),
+            Subcommand::Log.to_string(),
             &format!("{from_sha}^.."),
             "--reverse",
             "--format=%h %s",
@@ -112,7 +112,7 @@ fn get_commits(from_sha: String) -> Vec<Commit> {
 
 fn get_changed_files(sha_1: &String, sha_2: &String) -> Vec<String> {
     let child = match Command::new(GIT)
-        .args([Subcommand::Diff.build(), "--name-only", &sha_1, &sha_2])
+        .args([Subcommand::Diff.to_string(), "--name-only", &sha_1, &sha_2])
         .stdout(Stdio::piped())
         .spawn()
     {
@@ -137,7 +137,7 @@ fn get_changed_files(sha_1: &String, sha_2: &String) -> Vec<String> {
 
 fn checkout(value: &String) {
     match Command::new(GIT)
-        .args([Subcommand::Checkout.build(), &format!("{}", value)])
+        .args([Subcommand::Checkout.to_string(), &format!("{}", value)])
         .output()
     {
         Ok(_) => (),
@@ -150,7 +150,7 @@ fn checkout(value: &String) {
 
 fn create_worktree() {
     match Command::new(GIT)
-        .args([Subcommand::Worktree.build(), "add", "-d", WORKTREE_DIR])
+        .args([Subcommand::Worktree.to_string(), "add", "-d", WORKTREE_DIR])
         .output()
     {
         Ok(_) => (),
@@ -163,7 +163,7 @@ fn create_worktree() {
 
 fn delete_worktree() {
     match Command::new(GIT)
-        .args([Subcommand::Worktree.build(), "remove", WORKTREE_DIR])
+        .args([Subcommand::Worktree.to_string(), "remove", WORKTREE_DIR])
         .output()
     {
         Ok(_) => (),
