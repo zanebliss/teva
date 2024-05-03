@@ -42,11 +42,11 @@ fn main() {
             }
         }
 
-        checkout(&commit_pair[1].sha);
+        switch(&commit_pair[1].sha);
 
         run_tests(&cached_files);
 
-        checkout(&"-".to_string());
+        switch(&"-".to_string());
 
         print!("\n");
     }
@@ -99,9 +99,9 @@ fn get_changed_files(sha_1: &String, sha_2: &String) -> Vec<String> {
         .unwrap_or_default()
 }
 
-fn checkout(value: &String) {
+fn switch(value: &String) {
     Command::new("git")
-        .args(["checkout", &format!("{}", value)])
+        .args(["switch", &format!("{}", value)])
         .output()
         .expect("error");
 }
