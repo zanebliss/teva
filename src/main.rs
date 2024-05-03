@@ -1,16 +1,22 @@
-use std::env::args;
+use clap::Parser;
 
 mod git_client;
 mod runners;
 
+#[derive(Debug, Parser)]
+#[command(version, about, long_about = None)]
+struct Cli {
+    #[arg(short, long)]
+    from_sha: Option<String>,
+}
+
 fn main() {
     let cached_files: Vec<String> = vec![];
-    let args: Vec<String> = args().collect();
-    let mut from_sha = "main";
+    let cli = Cli::parse();
 
-    if args.len() > 1 {
-        from_sha = &args[1];
-    }
 
-    git_client::do_work(from_sha.to_string(), cached_files)
+    git_client::do_work(
+        String::from(cli.from_sha.as_deref().unwrap_or("main")),
+        cached_files,
+    )
 }
