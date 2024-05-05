@@ -1,6 +1,7 @@
 use colored::Colorize;
+use std::env::set_current_dir;
 use std::io::{self, BufRead, BufReader, Write};
-use std::process::{Command, Stdio};
+use std::process::{self, Command, Stdio};
 
 const GIT: &str = "git";
 const WORKTREE_DIR: &str = "gitavs-worktree";
@@ -36,12 +37,10 @@ pub fn do_work(from_sha: String) {
 
     create_worktree();
 
-    match Command::new("cd").arg(format!("../{WORKTREE_DIR}")).output() {
-        Ok(_) => (),
-        Err(err) => {
-            eprintln!("Could not cd: {}", err);
-            std::process::exit(-1);
-        }
+    if set_current_dir(&format!("../{WORKTREE_DIR}").to_string()).is_err() {
+        eprintln!("Error, couldn't change to worktree directory");
+        delete_worktree();
+        process::exit(-1);
     }
 
     let commits: Vec<Commit> = get_commits(from_sha);
@@ -152,7 +151,12 @@ fn checkout(value: &String) {
 
 fn create_worktree() {
     match Command::new(GIT)
-        .args([Subcommand::Worktree.to_string(), "add", "-d", &format!("../{WORKTREE_DIR}")])
+        .args([
+            Subcommand::Worktree.to_string(),
+            "add",
+            "-d",
+            &format!("../{WORKTREE_DIR}"),
+        ])
         .output()
     {
         Ok(_) => (),
@@ -165,7 +169,11 @@ fn create_worktree() {
 
 fn delete_worktree() {
     match Command::new(GIT)
-        .args([Subcommand::Worktree.to_string(), "remove", &format!("../{WORKTREE_DIR}")])
+        .args([
+            Subcommand::Worktree.to_string(),
+            "remove",
+            &format!("../{WORKTREE_DIR}"),
+        ])
         .output()
     {
         Ok(_) => (),
