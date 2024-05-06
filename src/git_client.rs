@@ -43,6 +43,23 @@ pub fn do_work(from_sha: String) {
         process::exit(-1);
     }
 
+    println!("⚙️ Installing dependencies in worktree...\n");
+    _ = match Command::new("bundle").spawn() {
+        Ok(child) => child.wait_with_output().expect("Failed to run bundler"),
+        Err(error) => {
+            eprintln!("Error running bundle: {}", error);
+            process::exit(1);
+        }
+    };
+    _ = match Command::new("yarn").spawn() {
+        Ok(child) => child.wait_with_output().expect("Failed to run yarn"),
+        Err(error) => {
+            eprintln!("Error running yarn: {}", error);
+            process::exit(1);
+        }
+    };
+    println!("\nDone! ✔\n");
+
     let commits: Vec<Commit> = get_commits(from_sha);
 
     for commit_pair in commits.windows(2) {
