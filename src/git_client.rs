@@ -40,7 +40,7 @@ pub fn do_work(from_sha: String) {
     if set_current_dir(&format!("../{WORKTREE_DIR}").to_string()).is_err() {
         eprintln!("Error, couldn't change to worktree directory");
         delete_worktree();
-        process::exit(-1);
+        process::exit(1);
     }
 
     println!("⚙️ Installing dependencies in worktree...\n");
@@ -161,7 +161,7 @@ fn checkout(value: &String) {
         Ok(_) => (),
         Err(err) => {
             eprintln!("Failed to switch: {}", err);
-            std::process::exit(-1);
+            std::process::exit(1);
         }
     }
 }
@@ -179,7 +179,7 @@ fn create_worktree() {
         Ok(_) => (),
         Err(err) => {
             eprintln!("Failed to add worktree: {}", err);
-            std::process::exit(-1);
+            std::process::exit(1);
         }
     }
 }
@@ -196,7 +196,7 @@ fn delete_worktree() {
         Ok(_) => (),
         Err(err) => {
             eprintln!("Failed to remove worktree: {}", err);
-            std::process::exit(-1);
+            std::process::exit(1);
         }
     }
 }
