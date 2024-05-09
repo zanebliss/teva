@@ -1,4 +1,4 @@
-use std::env::set_current_dir;
+use std::env::{current_dir, set_current_dir};
 use std::io::{self, BufRead, BufReader, Write};
 use std::process::{self, Command, Stdio};
 
@@ -33,6 +33,7 @@ impl Subcommand {
 
 pub fn do_work(from_sha: String) {
     let mut cached_files: Vec<String> = vec![];
+    let repo_dir = current_dir().unwrap();
 
     create_worktree();
 
@@ -41,6 +42,8 @@ pub fn do_work(from_sha: String) {
         delete_worktree();
         process::exit(1);
     }
+
+    runners::ruby::tests::rspec::setup_environment(repo_dir);
 
     let commits: Vec<Commit> = get_commits(from_sha);
 
