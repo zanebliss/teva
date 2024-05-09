@@ -1,4 +1,3 @@
-use colored::Colorize;
 use std::env::set_current_dir;
 use std::io::{self, BufRead, BufReader, Write};
 use std::process::{self, Command, Stdio};
@@ -48,7 +47,7 @@ pub fn do_work(from_sha: String) {
     for commit_pair in commits.windows(2) {
         print!(
             "{} {} ",
-            &commit_pair[1].sha.yellow(),
+            &commit_pair[1].sha,
             &commit_pair[1].message
         );
 
@@ -57,7 +56,7 @@ pub fn do_work(from_sha: String) {
         let changed_files = get_changed_files(&commit_pair[0].sha, &commit_pair[1].sha);
 
         if changed_files.is_empty() {
-            print!("{}\n", "No test files".bright_blue().bold());
+            print!("{}\n", "No test files");
             continue;
         }
 
