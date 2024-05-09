@@ -1,17 +1,32 @@
 pub mod ruby {
     const BUNDLE: &str = "bundle";
+    const EXEC: &str = "exec";
 
     pub mod tests {
         pub mod rspec {
             use std::io::{self, Write};
+            use std::path::PathBuf;
             use std::process;
             use std::process::Command;
 
-            use crate::runners::ruby::BUNDLE;
+            use crate::runners::node::{self, PACKAGE_JSON};
+            use crate::runners::ruby::{BUNDLE, EXEC};
+
+            const RSPEC: &str = "rspec";
+
+            // Not every rails app will need this, but if sprockets attempts
+            // to load JS assets in a test it will fail
+            pub fn setup_environment(repo_dir: PathBuf) {
+                if !repo_dir.join(PACKAGE_JSON).exists() {
+                    return;
+                }
+
+                node::setup_environment(repo_dir);
+            }
 
             pub fn run(cached_files: &Vec<String>) {
                 let child = match Command::new(BUNDLE)
-                    .args(["exec", "rspec"])
+                    .args([EXEC, RSPEC])
                     .args(cached_files)
                     .output()
                 {
