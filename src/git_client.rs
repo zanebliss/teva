@@ -2,10 +2,10 @@ use std::env::set_current_dir;
 use std::io::{self, BufRead, BufReader, Write};
 use std::process::{self, Command, Stdio};
 
+use crate::runners;
+
 const GIT: &str = "git";
 const WORKTREE_DIR: &str = "gitavs-worktree";
-
-use crate::runners::tests;
 
 #[derive(Default)]
 struct Commit {
@@ -68,7 +68,7 @@ pub fn do_work(from_sha: String) {
 
         checkout(&commit_pair[1].sha);
 
-        tests::rspec::run(&cached_files);
+        runners::ruby::tests::rspec::run(&cached_files);
 
         checkout(&"-".to_string());
 
