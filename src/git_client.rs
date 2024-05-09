@@ -35,6 +35,8 @@ pub fn do_work(from_sha: String) {
     let mut cached_files: Vec<String> = vec![];
     let repo_dir = current_dir().unwrap();
 
+    print!("\x1b[94m[GITAVS]\x1b[0m ⚙️ Setting up environment...");
+
     create_worktree();
 
     if set_current_dir(&format!("../{WORKTREE_DIR}").to_string()).is_err() {
@@ -44,6 +46,8 @@ pub fn do_work(from_sha: String) {
     }
 
     runners::ruby::tests::rspec::setup_environment(repo_dir);
+
+    print!(" Done ✔️\n");
 
     let commits: Vec<Commit> = get_commits(from_sha);
 
