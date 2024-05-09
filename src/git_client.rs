@@ -40,7 +40,7 @@ pub fn do_work(from_sha: String) {
     if set_current_dir(&format!("../{WORKTREE_DIR}").to_string()).is_err() {
         eprintln!("Error, couldn't change to worktree directory");
         delete_worktree();
-        process::exit(-1);
+        process::exit(1);
     }
 
     let commits: Vec<Commit> = get_commits(from_sha);
