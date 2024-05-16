@@ -1,5 +1,6 @@
 use std::env::{current_dir, set_current_dir};
 use std::io::{self, BufRead, BufReader, Write};
+use std::path::Path;
 use std::process::{self, Command, Stdio};
 
 use crate::runners;
@@ -66,6 +67,9 @@ pub fn do_work(from_sha: String) {
 
         if changed_files.is_empty() {
             println!("\x1b[94m[GITAVS]\x1b[0m No test files");
+
+            i += 1;
+
             continue;
         }
 
@@ -144,7 +148,10 @@ fn get_changed_files(sha_1: &String, sha_2: &String) -> Vec<String> {
             BufReader::new(stdout)
                 .lines()
                 .map(|line| line.expect("error"))
-                .filter(|line| line.ends_with("_spec.rb") || line.ends_with("_test.rb"))
+                .filter(|line| {
+                    Path::new(line).exists()
+                        && (line.ends_with("_spec.rb") || line.ends_with("_test.rb"))
+                })
                 .collect()
         })
         .unwrap_or_default()
