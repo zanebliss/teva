@@ -4,7 +4,6 @@ pub mod ruby {
 
     pub mod tests {
         pub mod rspec {
-            use std::io::{self, Write};
             use std::path::PathBuf;
             use std::process;
             use std::process::Command;
@@ -28,22 +27,16 @@ pub mod ruby {
                 let child = match Command::new(BUNDLE)
                     .args([EXEC, RSPEC])
                     .args(cached_files)
-                    .output()
+                    .spawn()
                 {
-                    Ok(output) => output,
+                    Ok(child) => child,
                     Err(err) => {
                         eprintln!("Error running bundle exec rspec: {}", err);
                         process::exit(1)
                     }
                 };
 
-                if child.status.code() == Some(1) {
-                    println!("{} ❌\n", "Failed!");
-                    println!("{}\n", "RSpec output:");
-                    io::stdout().write_all(&child.stdout).unwrap();
-                } else {
-                    print!("{} ✅", "Success!");
-                }
+                child.wait_with_output().unwrap();
             }
         }
     }

@@ -48,22 +48,24 @@ pub fn do_work(from_sha: String) {
     runners::ruby::tests::rspec::setup_environment(repo_dir);
 
     print!(" Done ✔️\n");
+    println!("\x1b[94m[GITAVS]\x1b[0m");
 
     let commits: Vec<Commit> = get_commits(from_sha);
 
+    let mut i = 1;
     for commit_pair in commits.windows(2) {
         print!(
-            "{} {} ",
-            &commit_pair[1].sha,
-            &commit_pair[1].message
+            "\x1b[94m[GITAVS]\x1b[0m \x1b[33m{}\x1b[0m {}",
+            &commit_pair[1].sha, &commit_pair[1].message
         );
+        print!(" ({i} of {})\n", commits.windows(2).len());
 
         io::stdout().flush().expect("Failed to flush stdout");
 
         let changed_files = get_changed_files(&commit_pair[0].sha, &commit_pair[1].sha);
 
         if changed_files.is_empty() {
-            print!("{}\n", "No test files");
+            println!("\x1b[94m[GITAVS]\x1b[0m No test files");
             continue;
         }
 
@@ -75,11 +77,17 @@ pub fn do_work(from_sha: String) {
 
         checkout(&commit_pair[1].sha);
 
+        println!(
+            "\x1b[94m[GITAVS]\x1b[0m Changed files: {}",
+            changed_files.join(" ")
+        );
+        println!("\x1b[94m[GITAVS]\x1b[0m Running tests...");
+
         runners::ruby::tests::rspec::run(&cached_files);
 
         checkout(&"-".to_string());
 
-        print!("\n");
+        i += 1;
     }
 
     delete_worktree();
