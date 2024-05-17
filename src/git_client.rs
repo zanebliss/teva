@@ -59,14 +59,14 @@ pub fn do_work(from_sha: String) {
             "\x1b[94m[GITAVS]\x1b[0m \x1b[33m{}\x1b[0m {}",
             &commit_pair[1].sha, &commit_pair[1].message
         );
-        print!(" ({i} of {})\n", commits.windows(2).len());
+        print!(" ({i} of {})", commits.windows(2).len());
 
         io::stdout().flush().expect("Failed to flush stdout");
 
         let changed_files = get_changed_files(&commit_pair[0].sha, &commit_pair[1].sha);
 
         if changed_files.is_empty() {
-            println!("\x1b[94m[GITAVS]\x1b[0m No test files");
+            print!(" \x1b[2mNo test files\x1b[0m\n");
 
             i += 1;
 
@@ -82,7 +82,7 @@ pub fn do_work(from_sha: String) {
         checkout(&commit_pair[1].sha);
 
         println!(
-            "\x1b[94m[GITAVS]\x1b[0m Changed files: {}",
+            "\n\x1b[94m[GITAVS]\x1b[0m Changed files: {}",
             changed_files.join(" ")
         );
         println!("\x1b[94m[GITAVS]\x1b[0m Running tests...");
