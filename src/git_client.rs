@@ -1,6 +1,5 @@
 use std::env::{current_dir, set_current_dir};
 use std::io::{self, BufRead, BufReader, Write};
-use std::path::Path;
 use std::process::{self, Command, Stdio};
 
 use crate::runners;
@@ -149,8 +148,7 @@ fn get_changed_files(sha_1: &String, sha_2: &String) -> Vec<String> {
                 .lines()
                 .map(|line| line.expect("error"))
                 .filter(|line| {
-                    Path::new(line).exists()
-                        && (line.ends_with("_spec.rb") || line.ends_with("_test.rb"))
+                    line.ends_with("_spec.rb") || line.ends_with("_test.rb")
                 })
                 .collect()
         })

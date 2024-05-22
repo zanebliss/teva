@@ -4,7 +4,7 @@ pub mod ruby {
 
     pub mod tests {
         pub mod rspec {
-            use std::path::PathBuf;
+            use std::path::{Path, PathBuf};
             use std::process;
             use std::process::Command;
 
@@ -24,9 +24,11 @@ pub mod ruby {
             }
 
             pub fn run(cached_files: &Vec<String>) {
+                let runnable_files = cached_files.iter().filter(|file| Path::new(file).exists());
+
                 let child = match Command::new(BUNDLE)
                     .args([EXEC, RSPEC])
-                    .args(cached_files)
+                    .args(runnable_files)
                     .spawn()
                 {
                     Ok(child) => child,
