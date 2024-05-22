@@ -163,7 +163,7 @@ fn checkout(value: &String) {
         Ok(_) => (),
         Err(err) => {
             eprintln!("Failed to switch: {}", err);
-            std::process::exit(-1);
+            std::process::exit(1);
         }
     }
 }
@@ -181,7 +181,7 @@ fn create_worktree() {
         Ok(_) => (),
         Err(err) => {
             eprintln!("Failed to add worktree: {}", err);
-            std::process::exit(-1);
+            std::process::exit(1);
         }
     }
 }
@@ -198,7 +198,7 @@ fn delete_worktree() {
         Ok(_) => (),
         Err(err) => {
             eprintln!("Failed to remove worktree: {}", err);
-            std::process::exit(-1);
+            std::process::exit(1);
         }
     }
 }
