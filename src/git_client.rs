@@ -141,18 +141,17 @@ fn get_changed_files(sha_1: &String, sha_2: &String) -> Vec<String> {
         }
     };
 
-    child
+    let changed_files: Vec<String> = child
         .stdout
         .map(|stdout| {
             BufReader::new(stdout)
                 .lines()
                 .map(|line| line.expect("error"))
-                .filter(|line| {
-                    line.ends_with("_spec.rb") || line.ends_with("_test.rb")
-                })
                 .collect()
         })
-        .unwrap_or_default()
+        .unwrap_or_default();
+
+    changed_files
 }
 
 fn checkout(value: &String) {

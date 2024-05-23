@@ -24,7 +24,9 @@ pub mod ruby {
             }
 
             pub fn run(cached_files: &Vec<String>) {
-                let runnable_files = cached_files.iter().filter(|file| Path::new(file).exists());
+                let runnable_files = cached_files.iter()
+                    .filter(|file| Path::new(file).exists())
+                    .filter(|file| file.ends_with("_spec.rb"));
 
                 let child = match Command::new(BUNDLE)
                     .args([EXEC, RSPEC])
