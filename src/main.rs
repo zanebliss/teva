@@ -3,7 +3,7 @@ use std::process;
 use std::env::{current_dir, set_current_dir};
 use clap::Parser;
 
-mod git_client;
+mod git;
 mod runners;
 
 fn main() {
@@ -41,11 +41,11 @@ fn do_work(from_sha: String) {
 
     print!("\x1b[94m[GITAVS]\x1b[0m ⚙️ Setting up environment...");
 
-    git_client::create_worktree();
+    git::create_worktree();
 
-    if set_current_dir(&format!("../{}", git_client::WORKTREE_DIR).to_string()).is_err() {
+    if set_current_dir(&format!("../{}", git::WORKTREE_DIR).to_string()).is_err() {
         eprintln!("Error, couldn't change to worktree directory");
-        git_client::delete_worktree();
+        git::delete_worktree();
         process::exit(1);
     }
 
@@ -54,7 +54,7 @@ fn do_work(from_sha: String) {
     print!(" Done ✔️\n");
     println!("\x1b[94m[GITAVS]\x1b[0m");
 
-    let commits: Vec<git_client::Commit> = git_client::get_commits(from_sha);
+    let commits: Vec<git::Commit> = git::get_commits(from_sha);
 
     let mut i = 1;
     for commit_pair in commits.windows(2) {
@@ -66,7 +66,7 @@ fn do_work(from_sha: String) {
 
         io::stdout().flush().expect("Failed to flush stdout");
 
-        let changed_files = git_client::get_changed_files(&commit_pair[0].sha, &commit_pair[1].sha);
+        let changed_files = git::get_changed_files(&commit_pair[0].sha, &commit_pair[1].sha);
 
         if changed_files.is_empty() {
             print!(" \x1b[2mNo test files\x1b[0m\n");
@@ -82,7 +82,7 @@ fn do_work(from_sha: String) {
             }
         }
 
-        git_client::checkout(&commit_pair[1].sha);
+        git::checkout(&commit_pair[1].sha);
 
         println!(
             "\n\x1b[94m[GITAVS]\x1b[0m Changed files: {}",
@@ -92,11 +92,11 @@ fn do_work(from_sha: String) {
 
         runners::ruby::tests::rspec::run(&cached_files);
 
-        git_client::checkout(&"-".to_string());
+        git::checkout(&"-".to_string());
 
         i += 1;
     }
 
-    git_client::delete_worktree();
+    git::delete_worktree();
 }
 
