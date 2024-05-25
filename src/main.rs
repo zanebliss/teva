@@ -5,11 +5,12 @@ use clap::Parser;
 
 mod git;
 mod runners;
+mod display;
 
 fn main() {
     let cli = Cli::parse();
 
-    print_logo();
+    display::print_logo();
 
     do_work(String::from(cli.from_sha.as_deref().unwrap_or("main")))
 }
@@ -19,20 +20,6 @@ fn main() {
 struct Cli {
     #[arg(short, long)]
     from_sha: Option<String>,
-}
-
-fn print_logo() {
-    println!(
-        r"
-       _
-      (_)  _
-  ____ _ _| |_ _____ _   _ ___
- / _  | (_   _|____ | | | /___)
-( (_| | | | |_/ ___ |\ V /___ |
- \___ |_|  \__)_____| \_/(___/
-(_____|
-"
-    )
 }
 
 fn do_work(from_sha: String) {
