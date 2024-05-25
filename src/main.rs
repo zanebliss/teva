@@ -1,16 +1,18 @@
 use clap::Parser;
 
+mod core;
+mod display;
 mod git;
 mod runners;
-mod display;
-mod core;
 
 fn main() {
     let cli = Cli::parse();
 
     display::print_logo();
 
-    core::do_work(String::from(cli.from_sha.as_deref().unwrap_or("main")));
+    core::do_work(String::from(
+        cli.from_sha.as_deref().unwrap_or(git::DEFAULT_FROM_SHA),
+    ));
 }
 
 #[derive(Debug, Parser)]
@@ -19,4 +21,3 @@ struct Cli {
     #[arg(short, long)]
     from_sha: Option<String>,
 }
-
