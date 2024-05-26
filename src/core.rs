@@ -1,10 +1,20 @@
-use std::io::Write;
 use crate::{git, runners};
+use std::io::Write;
 
 pub fn do_work(from_sha: String) {
-    let mut cached_files: Vec<String> = vec![];
+    let cached_files: Vec<String> = vec![];
     let repo_dir = std::env::current_dir().unwrap();
 
+    setup_environment(repo_dir);
+
+    let commits: Vec<git::Commit> = git::get_commits(from_sha);
+
+    iterate_and_perform(commits, cached_files);
+
+    git::delete_worktree();
+}
+
+fn setup_environment(repo_dir: std::path::PathBuf) {
     print!("\x1b[94m[GITAVS]\x1b[0m ⚙️ Setting up environment...");
 
     git::create_worktree();
@@ -20,9 +30,11 @@ pub fn do_work(from_sha: String) {
     print!(" Done ✔️\n");
     println!("\x1b[94m[GITAVS]\x1b[0m");
 
-    let commits: Vec<git::Commit> = git::get_commits(from_sha);
+}
 
+fn iterate_and_perform(commits: Vec<git::Commit>, mut cached_files: Vec<String>) {
     let mut i = 1;
+
     for commit_pair in commits.windows(2) {
         print!(
             "\x1b[94m[GITAVS]\x1b[0m \x1b[33m{}\x1b[0m {}",
@@ -62,6 +74,4 @@ pub fn do_work(from_sha: String) {
 
         i += 1;
     }
-
-    git::delete_worktree();
 }
