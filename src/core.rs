@@ -12,7 +12,7 @@ pub fn do_work(from_sha: String) {
         runners::ruby::tests::rspec::run(&cached_files)
     });
 
-    git::delete_worktree();
+    cleanup();
 }
 
 fn setup_environment(repo_dir: std::path::PathBuf) {
@@ -71,4 +71,8 @@ where
 
         git::checkout(&"-".to_string());
     }
+}
+
+fn cleanup() {
+    git::delete_worktree();
 }
