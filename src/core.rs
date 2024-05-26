@@ -47,12 +47,6 @@ where
 
         let changed_files = git::get_changed_files(&commit_pair[0].sha, &commit_pair[1].sha);
 
-        if changed_files.is_empty() {
-            print!(" \x1b[2mNo test files\x1b[0m\n");
-
-            continue;
-        }
-
         cached_files.extend(
             changed_files
                 .iter()
