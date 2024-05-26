@@ -1,5 +1,4 @@
 use crate::{git, runners};
-use std::io::Write;
 
 pub fn do_work(from_sha: String) {
     let cached_files: Vec<String> = vec![];
@@ -9,7 +8,9 @@ pub fn do_work(from_sha: String) {
 
     let commits: Vec<git::Commit> = git::get_commits(from_sha);
 
-    iterate_and_perform(commits, cached_files);
+    for_each_commit_pair(commits, cached_files, |cached_files| {
+        runners::ruby::tests::rspec::run(&cached_files)
+    });
 
     git::delete_worktree();
 }
@@ -29,10 +30,12 @@ fn setup_environment(repo_dir: std::path::PathBuf) {
 
     print!(" Done ✔️\n");
     println!("\x1b[94m[GITAVS]\x1b[0m");
-
 }
 
-fn iterate_and_perform(commits: Vec<git::Commit>, mut cached_files: Vec<String>) {
+fn for_each_commit_pair<F>(commits: Vec<git::Commit>, mut cached_files: Vec<String>, runner_fn: F)
+where
+    F: Fn(&Vec<String>),
+{
     let mut i = 1;
 
     for commit_pair in commits.windows(2) {
@@ -41,8 +44,6 @@ fn iterate_and_perform(commits: Vec<git::Commit>, mut cached_files: Vec<String>)
             &commit_pair[1].sha, &commit_pair[1].message
         );
         print!(" ({i} of {})", commits.windows(2).len());
-
-        std::io::stdout().flush().expect("Failed to flush stdout");
 
         let changed_files = git::get_changed_files(&commit_pair[0].sha, &commit_pair[1].sha);
 
@@ -68,7 +69,7 @@ fn iterate_and_perform(commits: Vec<git::Commit>, mut cached_files: Vec<String>)
         );
         println!("\x1b[94m[GITAVS]\x1b[0m Running tests...");
 
-        runners::ruby::tests::rspec::run(&cached_files);
+        runner_fn(&cached_files);
 
         git::checkout(&"-".to_string());
 
