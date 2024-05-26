@@ -36,9 +36,9 @@ fn for_each_commit_pair<F>(commits: Vec<git::Commit>, mut cached_files: Vec<Stri
 where
     F: Fn(&Vec<String>),
 {
-    let mut i = 1;
+    for (mut i, commit_pair) in commits.windows(2).enumerate() {
+        i += 1; // Start commit count at 1
 
-    for commit_pair in commits.windows(2) {
         print!(
             "\x1b[94m[GITAVS]\x1b[0m \x1b[33m{}\x1b[0m {}",
             &commit_pair[1].sha, &commit_pair[1].message
@@ -49,8 +49,6 @@ where
 
         if changed_files.is_empty() {
             print!(" \x1b[2mNo test files\x1b[0m\n");
-
-            i += 1;
 
             continue;
         }
@@ -72,7 +70,5 @@ where
         runner_fn(&cached_files);
 
         git::checkout(&"-".to_string());
-
-        i += 1;
     }
 }
