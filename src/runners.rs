@@ -5,8 +5,7 @@ pub mod ruby {
     pub mod tests {
         pub mod rspec {
             use std::path::{Path, PathBuf};
-            use std::process;
-            use std::process::Command;
+            use std::process::{self, Command, Stdio};
 
             use crate::runners::node::{self, PACKAGE_JSON};
             use crate::runners::ruby::{BUNDLE, EXEC};
@@ -32,6 +31,7 @@ pub mod ruby {
                 let child = match Command::new(BUNDLE)
                     .args([EXEC, RSPEC])
                     .args(runnable_files)
+                    .stderr(Stdio::null())
                     .spawn()
                 {
                     Ok(child) => child,
