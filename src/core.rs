@@ -16,7 +16,7 @@ pub fn do_work(from_sha: String) {
 }
 
 fn setup_environment(repo_dir: std::path::PathBuf) {
-    print!("\x1b[94m[GITAVS]\x1b[0m ⚙️ Setting up environment...");
+    print!("\x1b[94m[TEVA]\x1b[0m ⚙️ Setting up environment...");
 
     git::create_worktree();
 
@@ -29,7 +29,7 @@ fn setup_environment(repo_dir: std::path::PathBuf) {
     runners::ruby::tests::rspec::setup_environment(repo_dir);
 
     print!(" Done ✔️\n");
-    println!("\x1b[94m[GITAVS]\x1b[0m");
+    println!("\x1b[94m[TEVA]\x1b[0m");
 }
 
 fn for_each_commit_pair<F>(commits: Vec<git::Commit>, mut cached_files: Vec<String>, runner_fn: F)
@@ -40,7 +40,7 @@ where
         i += 1; // Start commit count at 1
 
         print!(
-            "\x1b[94m[GITAVS]\x1b[0m \x1b[33m{}\x1b[0m {}",
+            "\x1b[94m[TEVA]\x1b[0m \x1b[33m{}\x1b[0m {}",
             &commit_pair[1].sha, &commit_pair[1].message
         );
         print!(" ({i} of {})", commits.windows(2).len());
@@ -52,16 +52,16 @@ where
                 .iter()
                 .filter(|file| !cached_files.contains(file))
                 .map(|file| file.to_string())
-                .collect::<Vec<String>>()
+                .collect::<Vec<String>>(),
         );
 
         git::checkout(&commit_pair[1].sha);
 
         println!(
-            "\n\x1b[94m[GITAVS]\x1b[0m Changed files: {}",
+            "\n\x1b[94m[TEVA]\x1b[0m Changed files: {}",
             changed_files.join(" ")
         );
-        println!("\x1b[94m[GITAVS]\x1b[0m Running tests...");
+        println!("\x1b[94m[TEVA]\x1b[0m Running tests...");
 
         runner_fn(&cached_files);
 

@@ -2,7 +2,7 @@ use std::io::{BufRead, BufReader};
 use std::process::{Command, Stdio};
 
 pub const GIT: &str = "git";
-pub const WORKTREE_DIR: &str = "gitavs-worktree";
+pub const WORKTREE_DIR: &str = "teva-worktree";
 pub const DEFAULT_FROM_SHA: &str = "main";
 
 #[derive(Default)]
