@@ -1,11 +1,12 @@
 use clap::Parser;
+use std::io::Error;
 
 mod core;
 mod display;
 mod git;
 mod runners;
 
-fn main() {
+fn main() -> Result<(), Error> {
     let cli = Cli::parse();
 
     display::print_logo();
@@ -13,6 +14,8 @@ fn main() {
     core::do_work(String::from(
         cli.from_sha.as_deref().unwrap_or(git::DEFAULT_FROM_SHA),
     ));
+
+    Ok(())
 }
 
 #[derive(Debug, Parser)]
