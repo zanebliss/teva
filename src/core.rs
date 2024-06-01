@@ -1,6 +1,8 @@
+use std::sync::atomic::AtomicBool;
+
 use crate::{git, runners};
 
-pub fn do_work(from_sha: String) {
+pub fn do_work(from_sha: String, term: std::sync::Arc<AtomicBool>) {
     let cached_files: Vec<String> = vec![];
     let repo_dir = std::env::current_dir().unwrap();
 
@@ -8,11 +10,9 @@ pub fn do_work(from_sha: String) {
 
     let commits: Vec<git::Commit> = git::get_commits(from_sha);
 
-    for_each_commit_pair(commits, cached_files, |cached_files| {
-        runners::ruby::tests::rspec::run(&cached_files)
-    });
-
-    cleanup();
+    for_each_commit_pair(commits, cached_files, term, |cached_files| {
+        runners::ruby::tests::rspec::run(&cached_files);
+    })
 }
 
 fn setup_environment(repo_dir: std::path::PathBuf) {
@@ -32,11 +32,19 @@ fn setup_environment(repo_dir: std::path::PathBuf) {
     println!("\x1b[94m[TEVA]\x1b[0m");
 }
 
-fn for_each_commit_pair<F>(commits: Vec<git::Commit>, mut cached_files: Vec<String>, runner_fn: F)
-where
+fn for_each_commit_pair<F>(
+    commits: Vec<git::Commit>,
+    mut cached_files: Vec<String>,
+    term: std::sync::Arc<AtomicBool>,
+    runner_fn: F,
+) where
     F: Fn(&Vec<String>),
 {
     for (mut i, commit_pair) in commits.windows(2).enumerate() {
+        if term.load(std::sync::atomic::Ordering::SeqCst) {
+            break;
+        }
+
         i += 1; // Start commit count at 1
 
         print!(
