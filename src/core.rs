@@ -69,6 +69,6 @@ where
     }
 }
 
-fn cleanup() {
+pub fn cleanup() {
     git::delete_worktree();
 }
