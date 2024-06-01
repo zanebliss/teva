@@ -1,31 +1,34 @@
 use clap::Parser;
-use std::{io::Error, sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-}};
+use std::{
+    io::Error,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+};
 
 mod core;
 mod display;
 mod git;
 mod runners;
 
-fn main() -> Result<(), Error>{
-    let running = Arc::new(AtomicBool::new(true));
-    let r = running.clone();
+fn main() -> Result<(), Error> {
+    let term = Arc::new(AtomicBool::new(false));
+    let r = term.clone();
     let cli = Cli::parse();
 
     display::print_logo();
 
-    while running.load(Ordering::SeqCst) {
+    signal_hook::flag::register(signal_hook::consts::SIGINT, r.clone())?;
+
+    while !term.load(Ordering::SeqCst) {
         core::do_work(
             String::from(cli.from_sha.as_deref().unwrap_or(git::DEFAULT_FROM_SHA)),
-            running.clone(),
+            term.clone(),
         );
 
         // break after first iteration because work is not performed in a continuous loop
         break;
-
-
     }
 
     core::cleanup();
