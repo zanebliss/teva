@@ -52,7 +52,7 @@ where
                 .iter()
                 .filter(|file| !cached_files.contains(file))
                 .map(|file| file.to_string())
-                .collect::<Vec<String>>()
+                .collect::<Vec<String>>(),
         );
 
         git::checkout(&commit_pair[1].sha);

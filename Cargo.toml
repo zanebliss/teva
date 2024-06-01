@@ -1,5 +1,5 @@
 [package]
-name = "gitavs"
+name = "teva"
 version = "0.1.0"
 description = "Adventure sandals for continuous git commits"
 edition = "2021"

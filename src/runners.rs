@@ -24,7 +24,8 @@ pub mod ruby {
             }
 
             pub fn run(cached_files: &Vec<String>) {
-                let runnable_files = cached_files.iter()
+                let runnable_files = cached_files
+                    .iter()
                     .filter(|file| Path::new(file).exists())
                     .filter(|file| file.ends_with("_spec.rb"));
 
