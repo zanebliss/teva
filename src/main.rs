@@ -22,7 +22,7 @@ fn main() -> Result<(), Error> {
 
     while !term.load(Ordering::SeqCst) {
         core::do_work(
-            String::from(cli.from_sha.as_deref().unwrap_or(git::DEFAULT_FROM_SHA)),
+            String::from(cli.sha.as_deref().unwrap_or(git::DEFAULT_FROM_SHA)),
             term,
         );
 
@@ -39,5 +39,5 @@ fn main() -> Result<(), Error> {
 #[command(version, about, long_about = None)]
 struct Cli {
     #[arg(short, long)]
-    from_sha: Option<String>,
+    sha: Option<String>,
 }
