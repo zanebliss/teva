@@ -21,16 +21,22 @@ fn main() -> Result<(), Error> {
     signal_hook::flag::register(signal_hook::consts::SIGINT, term.clone())?;
 
     while !term.load(Ordering::SeqCst) {
-        core::do_work(
+        match core::do_work(
             String::from(cli.sha.as_deref().unwrap_or(git::DEFAULT_FROM_SHA)),
             term,
-        );
+        ) {
+            Err(err) => {
+                println!("\x1b[94m[TEVA]\x1b[0m Failed with error: {err}");
+                println!("\x1b[94m[TEVA]\x1b[0m Exiting...");
+            },
+            _ => {}
+        }
 
         // break after first iteration because work is not performed in a continuous loop
         break;
     }
 
-    core::cleanup();
+    core::cleanup()?;
 
     Ok(())
 }

@@ -1,35 +1,39 @@
-use std::sync::atomic::AtomicBool;
+use std::{io::Error, sync::atomic::AtomicBool};
 
 use crate::{git, runners};
 
-pub fn do_work(from_sha: String, term: std::sync::Arc<AtomicBool>) {
+pub fn do_work(from_sha: String, term: std::sync::Arc<AtomicBool>) -> Result<(), Error> {
     let cached_files: Vec<String> = vec![];
     let repo_dir = std::env::current_dir().unwrap();
 
-    setup_environment(repo_dir);
+    setup_environment(repo_dir)?;
 
-    let commits: Vec<git::Commit> = git::get_commits(from_sha);
+    let commits: Vec<git::Commit> = git::get_commits(from_sha)?;
 
     for_each_commit_pair(commits, cached_files, term, |cached_files| {
-        runners::ruby::tests::rspec::run(&cached_files);
-    })
+        let _ = runners::ruby::tests::rspec::run(&cached_files);
+    })?;
+
+    Ok(())
 }
 
-fn setup_environment(repo_dir: std::path::PathBuf) {
+fn setup_environment(repo_dir: std::path::PathBuf) -> Result<(), Error> {
     print!("\x1b[94m[TEVA]\x1b[0m ⚙️ Setting up environment...");
 
-    git::create_worktree();
+    git::create_worktree()?;
 
     if std::env::set_current_dir(&format!("../{}", git::WORKTREE_DIR).to_string()).is_err() {
         eprintln!("Error, couldn't change to worktree directory");
-        git::delete_worktree();
+        git::delete_worktree()?;
         std::process::exit(1);
     }
 
-    runners::ruby::tests::rspec::setup_environment(repo_dir);
+    runners::ruby::tests::rspec::setup_environment(repo_dir)?;
 
     print!(" Done ✔️\n");
     println!("\x1b[94m[TEVA]\x1b[0m");
+
+    Ok(())
 }
 
 fn for_each_commit_pair<F>(
@@ -37,7 +41,8 @@ fn for_each_commit_pair<F>(
     mut cached_files: Vec<String>,
     term: std::sync::Arc<AtomicBool>,
     runner_fn: F,
-) where
+) -> Result<(), Error>
+where
     F: Fn(&Vec<String>),
 {
     for (mut i, commit_pair) in commits.windows(2).enumerate() {
@@ -53,7 +58,7 @@ fn for_each_commit_pair<F>(
         );
         print!(" ({i} of {})", commits.windows(2).len());
 
-        let changed_files = git::get_changed_files(&commit_pair[0].sha, &commit_pair[1].sha);
+        let changed_files = git::get_changed_files(&commit_pair[0].sha, &commit_pair[1].sha)?;
 
         cached_files.extend(
             changed_files
@@ -63,7 +68,7 @@ fn for_each_commit_pair<F>(
                 .collect::<Vec<String>>(),
         );
 
-        git::checkout(&commit_pair[1].sha);
+        git::checkout(&commit_pair[1].sha)?;
 
         println!(
             "\n\x1b[94m[TEVA]\x1b[0m Changed files: {}",
@@ -73,10 +78,13 @@ fn for_each_commit_pair<F>(
 
         runner_fn(&cached_files);
 
-        git::checkout(&"-".to_string());
+        git::checkout(&"-".to_string())?;
     }
+    Ok(())
 }
 
-pub fn cleanup() {
-    git::delete_worktree();
+pub fn cleanup() -> Result<(), Error> {
+    git::delete_worktree()?;
+
+    Ok(())
 }
