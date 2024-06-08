@@ -4,8 +4,9 @@ pub mod ruby {
 
     pub mod tests {
         pub mod rspec {
+            use std::io::Error;
             use std::path::{Path, PathBuf};
-            use std::process::{self, Command, Stdio};
+            use std::process::{Command, Stdio};
 
             use crate::runners::node::{self, PACKAGE_JSON};
             use crate::runners::ruby::{BUNDLE, EXEC};
@@ -14,34 +15,31 @@ pub mod ruby {
 
             // Not every rails app will need this, but if sprockets attempts
             // to load JS assets in a test it will fail
-            pub fn setup_environment(repo_dir: PathBuf) {
+            pub fn setup_environment(repo_dir: PathBuf) -> Result<(), Error> {
                 if !repo_dir.join(PACKAGE_JSON).exists() {
-                    return;
+                    return Ok(());
                 }
 
-                node::setup_environment(repo_dir);
+                node::setup_environment(repo_dir)?;
+
+                Ok(())
             }
 
-            pub fn run(cached_files: &Vec<String>) {
+            pub fn run(cached_files: &Vec<String>) -> Result<(), Error> {
                 let runnable_files = cached_files
                     .iter()
                     .filter(|file| Path::new(file).exists())
                     .filter(|file| file.ends_with("_spec.rb"));
 
-                let child = match Command::new(BUNDLE)
+                Command::new(BUNDLE)
                     .args([EXEC, RSPEC])
                     .args(runnable_files)
                     .stderr(Stdio::null())
                     .spawn()
-                {
-                    Ok(child) => child,
-                    Err(err) => {
-                        eprintln!("Error running bundle exec rspec: {}", err);
-                        process::exit(1)
-                    }
-                };
+                    .unwrap()
+                    .wait_with_output()?;
 
-                child.wait_with_output().unwrap();
+                Ok(())
             }
         }
     }
@@ -49,40 +47,29 @@ pub mod ruby {
 
 pub mod node {
     use std::{
-        env::current_dir,
-        os::unix::fs::symlink,
-        path::PathBuf,
-        process::{self, Command},
+        env::current_dir, io::Error, os::unix::fs::symlink, path::PathBuf, process::Command,
     };
 
     const NODE_MODULES: &str = "node_modules";
     const YARN: &str = "yarn";
     pub const PACKAGE_JSON: &str = "package.json";
 
-    pub fn setup_environment(repo_dir: PathBuf) {
-        symlink_node_modules(repo_dir);
+    pub fn setup_environment(repo_dir: PathBuf) -> Result<(), Error> {
+        symlink_node_modules(repo_dir)?;
 
-        _ = match Command::new(YARN).output() {
-            Ok(_) => (),
-            Err(err) => {
-                eprintln!("Failed to run npm: {}", err);
-                process::exit(1);
-            }
-        }
+        Command::new(YARN).output()?;
+
+        Ok(())
     }
 
-    fn symlink_node_modules(repo_dir: PathBuf) {
-        let current_dir = match current_dir() {
-            Ok(dir) => dir,
-            Err(err) => {
-                eprintln!("Error getting current_dir: {}", err);
-                process::exit(1)
-            }
-        };
+    fn symlink_node_modules(repo_dir: PathBuf) -> Result<(), Error> {
+        let current_dir = current_dir()?;
 
-        _ = symlink(
+        symlink(
             format!("{}/{NODE_MODULES}", repo_dir.display()),
             format!("{}/{NODE_MODULES}", current_dir.display()),
-        )
+        )?;
+
+        Ok(())
     }
 }
