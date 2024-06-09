@@ -1,14 +1,18 @@
-use std::{io::Error, sync::atomic::AtomicBool};
+use std::{io::Error, process, sync::atomic::AtomicBool};
 
-use crate::{git, runners};
+use crate::{display, git, runners};
 
 pub fn do_work(from_sha: String, term: std::sync::Arc<AtomicBool>) -> Result<(), Error> {
     let cached_files: Vec<String> = vec![];
     let repo_dir = std::env::current_dir().unwrap();
 
-    setup_environment(repo_dir)?;
-
     let commits: Vec<git::Commit> = git::get_commits(from_sha)?;
+
+    shutdown_if_no_work(commits.len());
+
+    display::print_logo();
+
+    setup_environment(repo_dir)?;
 
     for_each_commit_pair(commits, cached_files, term, |cached_files| {
         let _ = runners::ruby::tests::rspec::run(&cached_files);
@@ -87,4 +91,14 @@ pub fn cleanup() -> Result<(), Error> {
     git::delete_worktree()?;
 
     Ok(())
+}
+
+fn shutdown_if_no_work(commit_len: usize) {
+    if commit_len > 1 {
+        return;
+    }
+
+    println!("Number of commits from main to HEAD is 1 or less");
+    println!("Try checking out to a branch with more commits, or use `teva --sha <sha>`");
+    process::exit(0)
 }
