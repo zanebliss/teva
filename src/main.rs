@@ -16,8 +16,6 @@ fn main() -> Result<(), Error> {
     let term = Arc::new(AtomicBool::new(false));
     let cli = Cli::parse();
 
-    display::print_logo();
-
     signal_hook::flag::register(signal_hook::consts::SIGINT, term.clone())?;
 
     while !term.load(Ordering::SeqCst) {
@@ -28,7 +26,7 @@ fn main() -> Result<(), Error> {
             Err(err) => {
                 println!("\x1b[94m[TEVA]\x1b[0m Failed with error: {err}");
                 println!("\x1b[94m[TEVA]\x1b[0m Exiting...");
-            },
+            }
             _ => {}
         }
 
