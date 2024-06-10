@@ -28,12 +28,14 @@ pub mod ruby {
             pub fn run(cached_files: &Vec<String>) -> Result<(), Error> {
                 let runnable_files = cached_files
                     .iter()
-                    .filter(|file| Path::new(file).exists())
-                    .filter(|file| file.ends_with("_spec.rb"));
+                    .map(|file| file.clone())
+                    .filter(|file| Path::new(file).exists() && file.ends_with("_spec.rb"))
+                    .collect::<Vec<String>>();
+
 
                 Command::new(BUNDLE)
                     .args([EXEC, RSPEC])
-                    .args(runnable_files)
+                    .args(&runnable_files)
                     .stderr(Stdio::null())
                     .spawn()
                     .unwrap()
