@@ -26,7 +26,7 @@ fn setup_environment(repo_dir: std::path::PathBuf) -> Result<(), Error> {
 
     git::create_worktree()?;
 
-    if std::env::set_current_dir(&format!("../{}", git::WORKTREE_DIR).to_string()).is_err() {
+    if std::env::set_current_dir(&format!("/tmp/{}", git::WORKTREE_DIR).to_string()).is_err() {
         eprintln!("Error, couldn't change to worktree directory");
         git::delete_worktree()?;
         std::process::exit(1);
