@@ -87,7 +87,7 @@ pub fn create_worktree() -> Result<(), Error> {
             Subcommand::Worktree.to_string(),
             "add",
             "-d",
-            &format!("../{WORKTREE_DIR}"),
+            &format!("/tmp/{WORKTREE_DIR}"),
         ])
         .output()?;
 
@@ -99,7 +99,7 @@ pub fn delete_worktree() -> Result<(), Error> {
         .args([
             Subcommand::Worktree.to_string(),
             "remove",
-            &format!("../{WORKTREE_DIR}"),
+            &format!("/tmp/{WORKTREE_DIR}"),
         ])
         .output()?;
 
