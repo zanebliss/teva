@@ -32,6 +32,9 @@ pub mod ruby {
                     .filter(|file| Path::new(file).exists() && file.ends_with("_spec.rb"))
                     .collect::<Vec<String>>();
 
+                if runnable_files.is_empty() {
+                    return Ok(());
+                }
 
                 Command::new(BUNDLE)
                     .args([EXEC, RSPEC])
