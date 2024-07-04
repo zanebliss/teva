@@ -100,5 +100,5 @@ fn shutdown_if_no_work(commit_len: usize) {
 
     println!("Number of commits from main to HEAD is 1 or less");
     println!("Try checking out to a branch with more commits, or use `teva --sha <sha>`");
-    process::exit(0)
+    process::exit(1)
 }
