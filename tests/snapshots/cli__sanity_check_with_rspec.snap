@@ -1,0 +1,67 @@
+---
+source: tests/cli.rs
+expression: "String::from_utf8(cmd.output().unwrap().stdout).unwrap()"
+---
+ _________  _______   ___      ___ ________     
+|\___   ___\\  ___ \ |\  \    /  /|\   __  \    
+\|___ \  \_\ \   __/|\ \  \  /  / | \  \|\  \   
+     \ \  \ \ \  \_|/_\ \  \/  / / \ \   __  \  
+      \ \  \ \ \  \_|\ \ \    / /   \ \  \ \  \ 
+       \ \__\ \ \_______\ \__/ /     \ \__\ \__\
+        \|__|  \|_______|\|__|/       \|__|\|__|
+    
+[94m[TEVA][0m ⚙️ Setting up environment... Done ✔️
+[94m[TEVA][0m
+[94m[TEVA][0m [[SHA][0m add bar (1 of 3)
+[94m[TEVA][0m Changed files: bar.rb spec/bar_spec.rb
+[94m[TEVA][0m Running tests...
+.
+
+Finished in [TIME] seconds (files took [TIME] seconds to load)
+1 example, 0 failures
+
+[94m[TEVA][0m [[SHA][0m add baz (2 of 3)
+[94m[TEVA][0m Changed files: baz.rb spec/baz_spec.rb
+[94m[TEVA][0m Running tests...
+.F
+
+Failures:
+
+  1) Baz is expected to eq 2
+     Failure/Error: expect(1).to eq(2)
+
+       expected: 2
+            got: 1
+
+       (compared using ==)
+     # ./spec/baz_spec.rb:6:in `block (2 levels) in <top (required)>'
+
+Finished in [TIME] seconds (files took [TIME] seconds to load)
+2 examples, 1 failure
+
+Failed examples:
+
+rspec ./spec/baz_spec.rb:5 # Baz is expected to eq 2
+
+[94m[TEVA][0m [[SHA][0m add fizz (3 of 3)
+[94m[TEVA][0m Changed files: fizz.rb spec/fizz_spec.rb
+[94m[TEVA][0m Running tests...
+.F.
+
+Failures:
+
+  1) Baz is expected to eq 2
+     Failure/Error: expect(1).to eq(2)
+
+       expected: 2
+            got: 1
+
+       (compared using ==)
+     # ./spec/baz_spec.rb:6:in `block (2 levels) in <top (required)>'
+
+Finished in [TIME] seconds (files took [TIME] seconds to load)
+3 examples, 1 failure
+
+Failed examples:
+
+rspec ./spec/baz_spec.rb:5 # Baz is expected to eq 2
