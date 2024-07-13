@@ -1,34 +1,33 @@
 use std::{io::Error, process, sync::atomic::AtomicBool};
 
-use crate::{display, git, runners};
+use crate::{display, git::{self, Client}, runners};
 
-pub fn do_work(from_sha: String, term: std::sync::Arc<AtomicBool>) -> Result<(), Error> {
+pub fn do_work(client: &Client, term: std::sync::Arc<AtomicBool>) -> Result<(), Error> {
     let cached_files: Vec<String> = vec![];
     let repo_dir = std::env::current_dir().unwrap();
-
-    let commits: Vec<git::Commit> = git::get_commits(from_sha)?;
+    let commits: Vec<git::Commit> = client.get_commits()?;
 
     shutdown_if_no_work(commits.len());
 
     display::print_logo();
 
-    setup_environment(repo_dir)?;
+    setup_environment(&client, repo_dir)?;
 
-    for_each_commit_pair(commits, cached_files, term, |cached_files| {
+    for_each_commit_pair(client, commits, cached_files, term, |cached_files| {
         let _ = runners::ruby::tests::rspec::run(&cached_files);
     })?;
 
     Ok(())
 }
 
-fn setup_environment(repo_dir: std::path::PathBuf) -> Result<(), Error> {
+fn setup_environment(client: &Client, repo_dir: std::path::PathBuf) -> Result<(), Error> {
     print!("\x1b[94m[TEVA]\x1b[0m ⚙️ Setting up environment...");
 
-    git::create_worktree()?;
+    client.create_worktree()?;
 
     if std::env::set_current_dir(&format!("/tmp/{}", git::WORKTREE_DIR).to_string()).is_err() {
         eprintln!("Error, couldn't change to worktree directory");
-        git::delete_worktree()?;
+        client.delete_worktree()?;
         std::process::exit(1);
     }
 
@@ -41,6 +40,7 @@ fn setup_environment(repo_dir: std::path::PathBuf) -> Result<(), Error> {
 }
 
 fn for_each_commit_pair<F>(
+    client: &Client,
     commits: Vec<git::Commit>,
     mut cached_files: Vec<String>,
     term: std::sync::Arc<AtomicBool>,
@@ -62,7 +62,7 @@ where
         );
         print!(" ({i} of {})", commits.windows(2).len());
 
-        let changed_files = git::get_changed_files(&commit_pair[0].sha, &commit_pair[1].sha)?;
+        let changed_files = client.get_changed_files(&commit_pair[0].sha, &commit_pair[1].sha)?;
 
         cached_files.extend(
             changed_files
@@ -72,7 +72,7 @@ where
                 .collect::<Vec<String>>(),
         );
 
-        git::checkout(&commit_pair[1].sha)?;
+        client.checkout(&commit_pair[1].sha)?;
 
         println!(
             "\n\x1b[94m[TEVA]\x1b[0m Changed files: {}",
@@ -82,13 +82,14 @@ where
 
         runner_fn(&cached_files);
 
-        git::checkout(&"-".to_string())?;
+        client.checkout(&"-".to_string())?;
     }
+
     Ok(())
 }
 
-pub fn cleanup() -> Result<(), Error> {
-    git::delete_worktree()?;
+pub fn cleanup(client: &Client) -> Result<(), Error> {
+    client.delete_worktree()?;
 
     Ok(())
 }
@@ -99,6 +100,6 @@ fn shutdown_if_no_work(commit_len: usize) {
     }
 
     println!("Number of commits from main to HEAD is 1 or less");
-    println!("Try checking out to a branch with more commits, or use `teva --sha <sha>`");
+    println!("Try checking out to a branch with more commits, or use `teva --commit <commit_sha_or_branch>`");
     process::exit(0)
 }
