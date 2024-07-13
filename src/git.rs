@@ -28,7 +28,7 @@ impl Client {
         match child.stdout.map(|stdout| {
             BufReader::new(stdout)
                 .lines()
-                .map(|line| Commit::build(line))
+                .map(|line| Commit::build(line.unwrap()))
                 .collect::<Vec<Commit>>()
         }) {
             Some(val) => Ok(val),
@@ -100,8 +100,8 @@ pub struct Commit {
 }
 
 impl Commit {
-    fn build<E>(line: Result<String, E>) -> Commit {
-        match line.unwrap_or_default().split_once(" ") {
+    fn build(line: String) -> Commit {
+        match line.split_once(" ") {
             Some((sha, message)) => Commit {
                 sha: sha.to_string(),
                 message: message.to_string(),
@@ -128,6 +128,4 @@ impl Subcommand {
         }
     }
 }
-
-
 
