@@ -6,12 +6,16 @@ pub const WORKTREE_DIR: &str = "teva-worktree";
 pub const DEFAULT_COMMIT: &str = "main";
 
 pub struct Client {
-    pub root_commit: String
+    pub root_commit: String,
+    pub commits: Vec<Commit>
 }
 
 impl Client {
     pub fn new(root_commit: String) -> Self {
-        Client { root_commit }
+        let mut client = Client { root_commit, commits: vec![] };
+
+        client.commits = client.get_commits().unwrap();
+        client
     }
 
     pub fn get_commits(&self) -> Result<Vec<Commit>, Error> {
