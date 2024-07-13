@@ -5,15 +5,14 @@ use crate::{display, git::{self, Client}, runners};
 pub fn do_work(client: &Client, term: std::sync::Arc<AtomicBool>) -> Result<(), Error> {
     let cached_files: Vec<String> = vec![];
     let repo_dir = std::env::current_dir().unwrap();
-    let commits: Vec<git::Commit> = client.get_commits()?;
 
-    shutdown_if_no_work(commits.len());
+    shutdown_if_no_work(client.commits.len());
 
     display::print_logo();
 
     setup_environment(&client, repo_dir)?;
 
-    for_each_commit_pair(client, commits, cached_files, term, |cached_files| {
+    for_each_commit_pair(client, cached_files, term, |cached_files| {
         let _ = runners::ruby::tests::rspec::run(&cached_files);
     })?;
 
@@ -41,7 +40,6 @@ fn setup_environment(client: &Client, repo_dir: std::path::PathBuf) -> Result<()
 
 fn for_each_commit_pair<F>(
     client: &Client,
-    commits: Vec<git::Commit>,
     mut cached_files: Vec<String>,
     term: std::sync::Arc<AtomicBool>,
     runner_fn: F,
@@ -49,7 +47,7 @@ fn for_each_commit_pair<F>(
 where
     F: Fn(&Vec<String>),
 {
-    for (mut i, commit_pair) in commits.windows(2).enumerate() {
+    for (mut i, commit_pair) in client.commits.windows(2).enumerate() {
         if term.load(std::sync::atomic::Ordering::SeqCst) {
             break;
         }
@@ -60,7 +58,7 @@ where
             "\x1b[94m[TEVA]\x1b[0m \x1b[33m{}\x1b[0m {}",
             &commit_pair[1].sha, &commit_pair[1].message
         );
-        print!(" ({i} of {})", commits.windows(2).len());
+        print!(" ({i} of {})", client.commits.windows(2).len());
 
         let changed_files = client.get_changed_files(&commit_pair[0].sha, &commit_pair[1].sha)?;
 
