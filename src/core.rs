@@ -1,6 +1,10 @@
 use std::{io::Error, process, sync::atomic::AtomicBool};
 
-use crate::{display, git::{self, Client}, runners};
+use crate::{
+    display,
+    git::{self, Client},
+    runners,
+};
 
 pub fn do_work(client: &Client, term: std::sync::Arc<AtomicBool>) -> Result<(), Error> {
     let cached_files: Vec<String> = vec![];
@@ -60,7 +64,7 @@ where
         );
         print!(" ({i} of {})", client.commits.windows(2).len());
 
-        let changed_files = client.get_changed_files(&commit_pair[0].sha, &commit_pair[1].sha)?;
+        let changed_files = client.get_changed_files(&commit_pair[0].sha, &commit_pair[1].sha);
 
         cached_files.extend(
             changed_files
