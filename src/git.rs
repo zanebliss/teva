@@ -1,7 +1,6 @@
 use std::io::Error;
-use std::process::{self, Command, Output, Stdio};
+use std::process::{self, Command, Output};
 
-pub const GIT: &str = "git";
 pub const WORKTREE_DIR: &str = "teva-worktree";
 pub const DEFAULT_COMMIT: &str = "main";
 
@@ -22,15 +21,12 @@ impl Client {
     }
 
     pub fn get_commits(&self) -> Vec<Commit> {
-        let output = self.execute_command(
-            vec![
-                Subcommand::Log.to_string(),
-                &format!("{}^..", self.root_commit),
-                "--reverse",
-                "--format=%h %s",
-            ],
-            false,
-        );
+        let output = self.execute_command(vec![
+            Subcommand::Log.to_string(),
+            &format!("{}^..", self.root_commit),
+            "--reverse",
+            "--format=%h %s",
+        ]);
 
         String::from_utf8(output.stdout)
             .unwrap()
@@ -46,10 +42,12 @@ impl Client {
     }
 
     pub fn get_changed_files(&self, sha_1: &String, sha_2: &String) -> Vec<String> {
-        let output = self.execute_command(
-            vec![Subcommand::Diff.to_string(), "--name-only", &sha_1, &sha_2],
-            false,
-        );
+        let output = self.execute_command(vec![
+            Subcommand::Diff.to_string(),
+            "--name-only",
+            &sha_1,
+            &sha_2,
+        ]);
 
         String::from_utf8(output.stdout)
             .unwrap()
@@ -65,49 +63,37 @@ impl Client {
     }
 
     pub fn checkout(&self, value: &String) -> Result<(), Error> {
-        self.execute_command(
-            vec![Subcommand::Checkout.to_string(), &format!("{}", value)],
-            true,
-        );
+        self.execute_command(vec![
+            Subcommand::Checkout.to_string(),
+            &format!("{}", value),
+        ]);
 
         Ok(())
     }
 
     pub fn create_worktree(&self) -> Result<(), Error> {
-        self.execute_command(
-            vec![
-                Subcommand::Worktree.to_string(),
-                "add",
-                "-d",
-                &format!("/tmp/{WORKTREE_DIR}"),
-            ],
-            true,
-        );
+        self.execute_command(vec![
+            Subcommand::Worktree.to_string(),
+            "add",
+            "-d",
+            &format!("/tmp/{WORKTREE_DIR}"),
+        ]);
 
         Ok(())
     }
 
     pub fn delete_worktree(&self) -> Result<(), Error> {
-        self.execute_command(
-            vec![
-                Subcommand::Worktree.to_string(),
-                "remove",
-                &format!("/tmp/{WORKTREE_DIR}"),
-            ],
-            true,
-        );
+        self.execute_command(vec![
+            Subcommand::Worktree.to_string(),
+            "remove",
+            &format!("/tmp/{WORKTREE_DIR}"),
+        ]);
 
         Ok(())
     }
 
-    fn execute_command(&self, args: Vec<&str>, is_null_stream: bool) -> Output {
-        let stdout_stream = if is_null_stream {
-            Stdio::null()
-        } else {
-            Stdio::piped()
-        };
-
-        match Command::new(GIT).args(args).stdout(stdout_stream).output() {
+    fn execute_command(&self, args: Vec<&str>) -> Output {
+        match Command::new("git").args(args).output() {
             Ok(output) => output,
             Err(err) => {
                 eprint!("Error executing git command: {}", err);
