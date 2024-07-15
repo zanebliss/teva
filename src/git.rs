@@ -22,7 +22,7 @@ impl Client {
 
     pub fn get_commits(&self) -> Vec<Commit> {
         let output = self.execute_command(vec![
-            Subcommand::Log.to_string(),
+            "log",
             &format!("{}^..", self.root_commit),
             "--reverse",
             "--format=%h %s",
@@ -36,7 +36,7 @@ impl Client {
 
     pub fn get_changed_files(&self, sha_1: &String, sha_2: &String) -> Vec<String> {
         let output = self.execute_command(vec![
-            Subcommand::Diff.to_string(),
+            "diff",
             "--name-only",
             &sha_1,
             &sha_2,
@@ -47,7 +47,7 @@ impl Client {
 
     pub fn checkout(&self, value: &String) -> Result<(), Error> {
         self.execute_command(vec![
-            Subcommand::Checkout.to_string(),
+            "checkout",
             &format!("{}", value),
         ]);
 
@@ -56,7 +56,7 @@ impl Client {
 
     pub fn create_worktree(&self) -> Result<(), Error> {
         self.execute_command(vec![
-            Subcommand::Worktree.to_string(),
+            "worktree",
             "add",
             "-d",
             &format!("/tmp/{WORKTREE_DIR}"),
@@ -67,7 +67,7 @@ impl Client {
 
     pub fn delete_worktree(&self) -> Result<(), Error> {
         self.execute_command(vec![
-            Subcommand::Worktree.to_string(),
+            "worktree",
             "remove",
             &format!("/tmp/{WORKTREE_DIR}"),
         ]);
@@ -115,24 +115,6 @@ impl Commit {
             }
         } else {
             Commit::default()
-        }
-    }
-}
-
-enum Subcommand {
-    Diff,
-    Log,
-    Checkout,
-    Worktree,
-}
-
-impl Subcommand {
-    fn to_string(&self) -> &str {
-        match self {
-            Subcommand::Log => "log",
-            Subcommand::Diff => "diff",
-            Subcommand::Checkout => "checkout",
-            Subcommand::Worktree => "worktree",
         }
     }
 }
