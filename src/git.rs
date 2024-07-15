@@ -28,17 +28,10 @@ impl Client {
             "--format=%h %s",
         ]);
 
-        String::from_utf8(output.stdout)
-            .unwrap()
-            .split('\n')
-            .filter_map(|line| {
-                if line.is_empty() {
-                    None
-                } else {
-                    Some(Commit::build(line.to_string()))
-                }
-            })
-            .collect::<Vec<Commit>>()
+        self.transform_stream(output.stdout)
+            .into_iter()
+            .map(|line| Commit::build(line))
+            .collect()
     }
 
     pub fn get_changed_files(&self, sha_1: &String, sha_2: &String) -> Vec<String> {
@@ -49,17 +42,7 @@ impl Client {
             &sha_2,
         ]);
 
-        String::from_utf8(output.stdout)
-            .unwrap()
-            .split('\n')
-            .filter_map(|line| {
-                if line.is_empty() {
-                    None
-                } else {
-                    Some(line.to_string())
-                }
-            })
-            .collect()
+        self.transform_stream(output.stdout)
     }
 
     pub fn checkout(&self, value: &String) -> Result<(), Error> {
@@ -90,6 +73,20 @@ impl Client {
         ]);
 
         Ok(())
+    }
+
+    fn transform_stream(&self, stdout: Vec<u8>) -> Vec<String> {
+        String::from_utf8(stdout)
+            .unwrap()
+            .split('\n')
+            .filter_map(|line| {
+                if line.is_empty() {
+                    None
+                } else {
+                    Some(line.to_string())
+                }
+            })
+            .collect()
     }
 
     fn execute_command(&self, args: Vec<&str>) -> Output {
