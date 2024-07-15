@@ -108,12 +108,13 @@ pub struct Commit {
 
 impl Commit {
     fn build(line: String) -> Commit {
-        match line.split_once(" ") {
-            Some((sha, message)) => Commit {
+        if let Some((sha, message)) = line.split_once(" ") {
+            Commit {
                 sha: sha.to_string(),
                 message: message.to_string(),
-            },
-            None => Commit::default(),
+            }
+        } else {
+            Commit::default()
         }
     }
 }
