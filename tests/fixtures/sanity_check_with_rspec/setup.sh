@@ -8,9 +8,14 @@ echo "Done"
 echo "Installing dependencies..."
 bundle install --gemfile=$1/Gemfile
 echo "Initializing git repository..."
-git config --global user.name 'Your name'
-git config --global user.email 'you@example.com'
-git config --global init.defaultBranch main
+
+if ! test -f ~/.gitconfig; then
+  touch ~/.gitconfig
+  git config --global user.name 'Your name'
+  git config --global user.email 'you@example.com'
+  git config --global init.defaultBranch main
+fi
+
 git init $1
 echo "Committing files..."
 git -C $1 add init.rb spec/init_spec.rb Gemfile Gemfile.lock
