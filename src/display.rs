@@ -19,3 +19,8 @@ impl Display for Color {
         write!(f, "{code}")
     }
 }
+
+pub enum Fd {
+    Stdout,
+    Stderr,
+}
