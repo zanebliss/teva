@@ -12,8 +12,6 @@ pub fn do_work(client: &Client, term: std::sync::Arc<AtomicBool>) -> Result<(), 
 
     shutdown_if_no_work(client.commits.len());
 
-    display::print_logo();
-
     setup_environment(&client, repo_dir)?;
 
     for_each_commit_pair(client, cached_files, term, |cached_files| {
