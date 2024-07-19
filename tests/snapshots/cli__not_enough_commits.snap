@@ -1,6 +1,0 @@
----
-source: tests/cli.rs
-expression: "String::from_utf8(cmd.output().unwrap().stdout).unwrap()"
----
-Number of commits from main to HEAD is 1 or less
-Try checking out to a branch with more commits, or use `teva --sha <sha>`
