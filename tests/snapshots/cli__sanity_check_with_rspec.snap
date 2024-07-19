@@ -3,7 +3,7 @@ source: tests/cli.rs
 expression: result
 ---
 [94m[TEVA][0m ⚙️ Setting up environment... Done ✔️
-[94m[TEVA][0m
+[94m[TEVA][0m 
 [94m[TEVA][0m [[SHA][0m add bar (1 of 3)
 [94m[TEVA][0m Changed files: bar.rb spec/bar_spec.rb
 [94m[TEVA][0m Running tests...

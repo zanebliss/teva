@@ -1,28 +1,38 @@
 use std::{io::Error, process, sync::atomic::AtomicBool};
 
 use crate::{
-    display,
+    display::{Color, Fd, Logger},
     git::{self, Client},
     runners,
 };
 
-pub fn do_work(client: &Client, term: std::sync::Arc<AtomicBool>) -> Result<(), Error> {
+pub fn do_work(
+    client: &Client,
+    logger: &mut Logger,
+    term: std::sync::Arc<AtomicBool>,
+) -> Result<(), Error> {
     let cached_files: Vec<String> = vec![];
     let repo_dir = std::env::current_dir().unwrap();
 
-    shutdown_if_no_work(client.commits.len());
+    shutdown_if_no_work(logger, client.commits.len());
 
-    setup_environment(&client, repo_dir)?;
+    setup_environment(&client, logger, repo_dir)?;
 
-    for_each_commit_pair(client, cached_files, term, |cached_files| {
+    for_each_commit_pair(client, logger, cached_files, term, |cached_files| {
         let _ = runners::ruby::tests::rspec::run(&cached_files);
     })?;
 
     Ok(())
 }
 
-fn setup_environment(client: &Client, repo_dir: std::path::PathBuf) -> Result<(), Error> {
-    print!("\x1b[94m[TEVA]\x1b[0m ⚙️ Setting up environment...");
+fn setup_environment(
+    client: &Client,
+    logger: &mut Logger,
+    repo_dir: std::path::PathBuf,
+) -> Result<(), Error> {
+    logger
+        .with_text("⚙️ Setting up environment...".to_string())
+        .call();
 
     client.create_worktree()?;
 
@@ -35,13 +45,15 @@ fn setup_environment(client: &Client, repo_dir: std::path::PathBuf) -> Result<()
     runners::ruby::tests::rspec::setup_environment(repo_dir)?;
 
     print!(" Done ✔️\n");
-    println!("\x1b[94m[TEVA]\x1b[0m");
+
+    logger.with_text("\n".to_string()).call();
 
     Ok(())
 }
 
 fn for_each_commit_pair<F>(
     client: &Client,
+    logger: &mut Logger,
     mut cached_files: Vec<String>,
     term: std::sync::Arc<AtomicBool>,
     runner_fn: F,
@@ -56,11 +68,15 @@ where
 
         i += 1; // Start commit count at 1
 
-        print!(
-            "\x1b[94m[TEVA]\x1b[0m \x1b[33m{}\x1b[0m {}",
-            &commit_pair[1].sha, &commit_pair[1].message
-        );
-        print!(" ({i} of {})", client.commits.windows(2).len());
+        logger
+            .with_color(Color::Yellow)
+            .with_text(format!("{}", &commit_pair[1].sha))
+            .call();
+        logger
+            .with_text(format!("{}", &commit_pair[1].message))
+            .without_prefix()
+            .call();
+        println!(" ({i} of {})", client.commits.windows(2).len());
 
         let changed_files = client.get_changed_files(&commit_pair[0].sha, &commit_pair[1].sha);
 
@@ -74,11 +90,10 @@ where
 
         client.checkout(&commit_pair[1].sha)?;
 
-        println!(
-            "\n\x1b[94m[TEVA]\x1b[0m Changed files: {}",
-            changed_files.join(" ")
-        );
-        println!("\x1b[94m[TEVA]\x1b[0m Running tests...");
+        logger
+            .with_text(format!("Changed files: {}\n", changed_files.join(" ")))
+            .call();
+        logger.with_text("Running tests...\n".to_string()).call();
 
         runner_fn(&cached_files);
 
@@ -94,12 +109,18 @@ pub fn cleanup(client: &Client) -> Result<(), Error> {
     Ok(())
 }
 
-fn shutdown_if_no_work(commit_len: usize) {
+fn shutdown_if_no_work(logger: &mut Logger, commit_len: usize) {
     if commit_len > 1 {
         return;
     }
 
-    println!("Number of commits from main to HEAD is 1 or less");
-    println!("Try checking out to a branch with more commits, or use `teva --commit <commit_sha_or_branch>`");
+    logger
+        .with_stream(Fd::Stderr)
+        .with_color(Color::None)
+        .with_text("Number of commits from main to HEAD is 1 or less\n".to_string())
+        .call();
+    logger.with_text(
+        "Try checking out to a branch with more commits, or use `teva --commit <commit_sha_or_branch>`".to_string()
+    ).call();
     process::exit(0)
 }

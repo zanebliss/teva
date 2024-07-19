@@ -1,4 +1,6 @@
+use crate::display::Fd;
 use clap::Parser;
+use display::{Color, Logger};
 use git::Client;
 use std::{
     io::Error,
@@ -18,14 +20,21 @@ fn main() -> Result<(), Error> {
     let cli = Cli::parse();
     let root_commit = cli.commit.as_deref().unwrap_or(git::DEFAULT_COMMIT);
     let client = Client::new(root_commit.to_string());
-
+    let mut logger = Logger::new();
     signal_hook::flag::register(signal_hook::consts::SIGINT, term.clone())?;
 
     while !term.load(Ordering::SeqCst) {
-        match core::do_work(&client, term) {
+        match core::do_work(&client, &mut logger, term) {
             Err(err) => {
-                println!("\x1b[94m[TEVA]\x1b[0m Failed with error: {err}");
-                println!("\x1b[94m[TEVA]\x1b[0m Exiting...");
+                logger
+                    .with_stream(Fd::Stderr)
+                    .with_color(Color::Red)
+                    .with_text(format!("Failed with error: {err}\n"))
+                    .call();
+                logger
+                    .with_color(Color::Red)
+                    .with_text("Exiting...".to_string())
+                    .call();
             }
             _ => {}
         }

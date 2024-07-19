@@ -77,7 +77,7 @@ impl Logger {
 
         match self.stream {
             Fd::Stdout => print!(" {formatted_text}"),
-            Fd::Stderr => eprint!(" {formatted_text}") 
+            Fd::Stderr => eprint!(" {formatted_text}"),
         }
 
         self.reset();
