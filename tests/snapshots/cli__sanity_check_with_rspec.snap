@@ -1,15 +1,7 @@
 ---
 source: tests/cli.rs
-expression: "String::from_utf8(cmd.output().unwrap().stdout).unwrap()"
+expression: result
 ---
- _________  _______   ___      ___ ________     
-|\___   ___\\  ___ \ |\  \    /  /|\   __  \    
-\|___ \  \_\ \   __/|\ \  \  /  / | \  \|\  \   
-     \ \  \ \ \  \_|/_\ \  \/  / / \ \   __  \  
-      \ \  \ \ \  \_|\ \ \    / /   \ \  \ \  \ 
-       \ \__\ \ \_______\ \__/ /     \ \__\ \__\
-        \|__|  \|_______|\|__|/       \|__|\|__|
-    
 [94m[TEVA][0m ⚙️ Setting up environment... Done ✔️
 [94m[TEVA][0m
 [94m[TEVA][0m [[SHA][0m add bar (1 of 3)
