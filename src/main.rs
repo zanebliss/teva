@@ -53,4 +53,7 @@ fn main() -> Result<(), Error> {
 struct Cli {
     #[arg(short, long)]
     commit: Option<String>,
+
+    #[arg(short, long)]
+    runner: Option<String>
 }
