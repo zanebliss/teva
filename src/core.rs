@@ -3,12 +3,13 @@ use std::{io::Error, process, sync::atomic::AtomicBool};
 use crate::{
     display::{Color, Fd, Logger},
     git::{self, Client},
-    runners,
+    runners::Runner,
 };
 
 pub fn do_work(
     client: &Client,
     logger: &mut Logger,
+    runner: &Runner,
     term: std::sync::Arc<AtomicBool>,
 ) -> Result<(), Error> {
     let cached_files: Vec<String> = vec![];
@@ -16,10 +17,10 @@ pub fn do_work(
 
     shutdown_if_no_work(logger, client.commits.len());
 
-    setup_environment(&client, logger, repo_dir)?;
+    setup_environment(client, logger, runner, repo_dir)?;
 
     for_each_commit_pair(client, logger, cached_files, term, |cached_files| {
-        let _ = runners::ruby::tests::rspec::run(&cached_files);
+        let _ = runner.run(&cached_files);
     })?;
 
     Ok(())
@@ -28,6 +29,7 @@ pub fn do_work(
 fn setup_environment(
     client: &Client,
     logger: &mut Logger,
+    runner: &Runner,
     repo_dir: std::path::PathBuf,
 ) -> Result<(), Error> {
     logger
@@ -42,7 +44,7 @@ fn setup_environment(
         std::process::exit(1);
     }
 
-    runners::ruby::tests::rspec::setup_environment(repo_dir)?;
+    runner.setup_environment(repo_dir)?;
 
     print!(" Done ✔️\n");
 

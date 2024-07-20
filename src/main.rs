@@ -2,6 +2,7 @@ use crate::display::Fd;
 use clap::Parser;
 use display::{Color, Logger};
 use git::Client;
+use runners::{Ruby, Runner};
 use std::{
     io::Error,
     sync::{
@@ -23,12 +24,15 @@ fn main() -> Result<(), Error> {
             .unwrap_or(git::DEFAULT_COMMIT.to_string())
             .to_string(),
     );
+    let runner = Runner {
+        runnable: Ruby::Rspec,
+    };
     let mut logger = Logger::new();
 
     signal_hook::flag::register(signal_hook::consts::SIGINT, term.clone())?;
 
     while !term.load(Ordering::SeqCst) {
-        match core::do_work(&client, &mut logger, term) {
+        match core::do_work(&client, &mut logger, &runner, term) {
             Err(err) => {
                 logger
                     .with_stream(Fd::Stderr)
