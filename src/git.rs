@@ -35,21 +35,13 @@ impl Client {
     }
 
     pub fn get_changed_files(&self, sha_1: &String, sha_2: &String) -> Vec<String> {
-        let output = self.execute_command(vec![
-            "diff",
-            "--name-only",
-            &sha_1,
-            &sha_2,
-        ]);
+        let output = self.execute_command(vec!["diff", "--name-only", &sha_1, &sha_2]);
 
         self.transform_stream(output.stdout)
     }
 
     pub fn checkout(&self, value: &String) -> Result<(), Error> {
-        self.execute_command(vec![
-            "checkout",
-            &format!("{}", value),
-        ]);
+        self.execute_command(vec!["checkout", &format!("{}", value)]);
 
         Ok(())
     }
@@ -66,11 +58,7 @@ impl Client {
     }
 
     pub fn delete_worktree(&self) -> Result<(), Error> {
-        self.execute_command(vec![
-            "worktree",
-            "remove",
-            &format!("/tmp/{WORKTREE_DIR}"),
-        ]);
+        self.execute_command(vec!["worktree", "remove", &format!("/tmp/{WORKTREE_DIR}")]);
 
         Ok(())
     }
