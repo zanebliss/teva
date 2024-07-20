@@ -18,9 +18,13 @@ mod runners;
 fn main() -> Result<(), Error> {
     let term = Arc::new(AtomicBool::new(false));
     let cli = Cli::parse();
-    let root_commit = cli.commit.as_deref().unwrap_or(git::DEFAULT_COMMIT);
-    let client = Client::new(root_commit.to_string());
+    let client = Client::new(
+        cli.commit
+            .unwrap_or(git::DEFAULT_COMMIT.to_string())
+            .to_string(),
+    );
     let mut logger = Logger::new();
+
     signal_hook::flag::register(signal_hook::consts::SIGINT, term.clone())?;
 
     while !term.load(Ordering::SeqCst) {
@@ -55,5 +59,5 @@ struct Cli {
     commit: Option<String>,
 
     #[arg(short, long)]
-    runner: Option<String>
+    runner: Option<String>,
 }
