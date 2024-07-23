@@ -1,4 +1,5 @@
-use std::io::Error;
+use std::fs::File;
+use std::io::{Error, Write};
 use std::process::{self, Command, Output};
 
 pub const WORKTREE_DIR: &str = "teva-worktree";
@@ -79,7 +80,11 @@ impl Client {
 
     fn execute_command(&self, args: Vec<&str>) -> Output {
         match Command::new("git").args(args).output() {
-            Ok(output) => output,
+            Ok(output) => { 
+                let mut dump = File::create("/tmp/teva.dump").unwrap();
+                let _ = dump.write_all(&output.stderr);
+                output
+            }
             Err(err) => {
                 eprint!("Error executing git command: {}", err);
                 process::exit(1);

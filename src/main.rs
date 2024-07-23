@@ -2,7 +2,7 @@ use crate::display::Fd;
 use clap::Parser;
 use display::{Color, Logger};
 use git::Client;
-use runners::{Ruby, Runner};
+use runners::{infer_executable, Runner};
 use std::{
     io::Error,
     sync::{
@@ -24,10 +24,10 @@ fn main() -> Result<(), Error> {
             .unwrap_or(git::DEFAULT_COMMIT.to_string())
             .to_string(),
     );
-    let runner = Runner {
-        runnable: Ruby::Rspec,
-    };
     let mut logger = Logger::new();
+    let runner = Runner {
+        runnable: infer_executable(cli.runner)
+    };
 
     signal_hook::flag::register(signal_hook::consts::SIGINT, term.clone())?;
 

@@ -1,7 +1,5 @@
 use std::{
-    io::Error,
-    path::{Path, PathBuf},
-    process::{Command, Stdio},
+    io::Error, path::{Path, PathBuf}, process::{Command, Stdio}
 };
 
 pub struct Runner {
@@ -10,25 +8,42 @@ pub struct Runner {
 
 pub enum Ruby {
     Rspec,
+    Rails
 }
 
 impl Ruby {
     fn program(&self) -> &str {
         match &self {
             Ruby::Rspec => "bundle",
+            Ruby::Rails => "bin/rails"
         }
     }
 
     fn args(&self) -> Vec<&str> {
         match &self {
             Ruby::Rspec => vec!["exec", "rspec"],
+            Ruby::Rails => vec!["test"]
         }
     }
 
     fn file_suffix(&self) -> &str {
         match &self {
             Ruby::Rspec => "_spec.rb",
+            Ruby::Rails => "_test.rb"
         }
+    }
+
+}
+
+pub fn infer_executable(arg: Option<String>) -> Ruby {
+    if let Some(executable) = arg {
+        if executable == "rails" {
+            Ruby::Rails
+        } else {
+            panic!("Unknown executable");
+        }
+    } else {
+        Ruby::Rspec
     }
 }
 
