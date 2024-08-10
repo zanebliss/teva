@@ -77,6 +77,7 @@ mod tests {
             let test = result.test.setup.unwrap().steps;
             let run = result.test.run.unwrap().steps;
 
+            assert_eq!("_spec.rb", result.test.pattern);
             assert_eq!(2, test.len());
             assert_eq!("_spec.rb", result.test.pattern);
             assert_eq!("yarn", test.first().unwrap().command);

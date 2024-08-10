@@ -1,4 +1,6 @@
 [test]
 pattern = "_spec.rb"
+[test.setup]
+steps = [ { name = "hello", command = "echo", args = ["foo"] } ]
 [test.run]
 steps = [ { name = "rspec", command = "bundle", args = ["exec", "rspec"] } ]

@@ -2,8 +2,10 @@
 source: tests/cli.rs
 expression: result
 ---
-[teva] ⚙️ Setting up environment... Done ✔️
-[teva]
+[teva] ⚙️ Setting up environment...
+[teva] Step (1 of 1) `hello`
+foo
+[teva] Done ✔️
 [teva] [SHA] add bar (1 of 3)
 [teva] Changed files: bar.rb spec/bar_spec.rb
 [teva] Running tests...
