@@ -15,7 +15,7 @@ pub fn do_work(
     client: &Client,
     config: Config,
     term: std::sync::Arc<AtomicBool>,
-) -> Result<(), Error> {
+) -> Result<(), Box<dyn Error>> {
     let cached_files: Vec<String> = vec![];
 
     shutdown_if_no_work(client.commits.len());
@@ -29,7 +29,7 @@ pub fn do_work(
     Ok(())
 }
 
-fn setup_environment(client: &Client, config: &Config) -> Result<(), Error> {
+fn setup_environment(client: &Client, config: &Config) -> Result<(), Box<dyn Error>> {
     print!("{} ⚙️ Setting up environment...", "[teva]".blue());
 
     client.create_worktree()?;
@@ -52,7 +52,7 @@ fn for_each_commit_pair<F>(
     mut cached_files: Vec<String>,
     term: std::sync::Arc<AtomicBool>,
     runner_fn: F,
-) -> Result<(), Error>
+) -> Result<(), Box<dyn Error>>
 where
     F: Fn(&Vec<String>),
 {
@@ -98,7 +98,7 @@ where
     Ok(())
 }
 
-pub fn cleanup(client: &Client) -> Result<(), Error> {
+pub fn cleanup(client: &Client) -> Result<(), Box<dyn Error>> {
     client.delete_worktree()?;
 
     Command::new("rm")
