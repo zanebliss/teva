@@ -9,7 +9,7 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.5.4", features = ["derive"] }
 colored = "2.1.0"
-serde = "1.0"
+serde = { version = "1.0", features = ["derive"] }
 signal-hook = "0.3.17"
 toml = "0.8.19"
 
