@@ -1,80 +1,61 @@
-pub mod ruby {
-    const BUNDLE: &str = "bundle";
-    const EXEC: &str = "exec";
+use std::{
+    error::Error,
+    io::{self, Write},
+    path::Path,
+    process::{Command, Stdio},
+};
 
-    pub mod tests {
-        pub mod rspec {
-            use std::io::Error;
-            use std::path::{Path, PathBuf};
-            use std::process::{Command, Stdio};
+use colored::Colorize;
 
-            use crate::runners::node::{self, PACKAGE_JSON};
-            use crate::runners::ruby::{BUNDLE, EXEC};
+use crate::parser::Config;
 
-            const RSPEC: &str = "rspec";
+pub fn setup(config: &Config) -> Result<(), Box<dyn Error>> {
+    if let Some(setup) = &config.test.setup {
+        let mut count = 1;
 
-            // Not every rails app will need this, but if sprockets attempts
-            // to load JS assets in a test it will fail
-            pub fn setup_environment(repo_dir: PathBuf) -> Result<(), Error> {
-                if !repo_dir.join(PACKAGE_JSON).exists() {
-                    return Ok(());
-                }
+        for step in &setup.steps {
+            println!(
+                "\n{} Step ({} of {}) `{}`",
+                "[teva]".blue(),
+                count,
+                setup.steps.len(),
+                step.name
+            );
 
-                node::setup_environment(repo_dir)?;
+            let output = Command::new(&step.command)
+                .args(step.args.as_deref().unwrap_or(&[]))
+                .output()?;
 
-                Ok(())
-            }
+            io::stdout().write_all(&output.stdout).unwrap();
+            io::stderr().write_all(&output.stderr).unwrap();
 
-            pub fn run(cached_files: &Vec<String>) -> Result<(), Error> {
-                let runnable_files = cached_files
-                    .iter()
-                    .map(|file| file.clone())
-                    .filter(|file| Path::new(file).exists() && file.ends_with("_spec.rb"))
-                    .collect::<Vec<String>>();
-
-                if runnable_files.is_empty() {
-                    return Ok(());
-                }
-
-                Command::new(BUNDLE)
-                    .args([EXEC, RSPEC])
-                    .args(&runnable_files)
-                    .stderr(Stdio::null())
-                    .spawn()
-                    .unwrap()
-                    .wait_with_output()?;
-
-                Ok(())
-            }
+            count += 1;
         }
     }
+
+    Ok(())
 }
 
-pub mod node {
-    use std::{
-        env::current_dir, io::Error, os::unix::fs::symlink, path::PathBuf, process::Command,
-    };
+pub fn run(config: &Config, cached_files: &Vec<String>) -> Result<(), Box<dyn Error>> {
+    let runnable_files: Vec<_> = cached_files
+        .iter()
+        .filter(|file| Path::new(file).exists() && file.ends_with(config.test.pattern.as_str()))
+        .collect();
 
-    const NODE_MODULES: &str = "node_modules";
-    const YARN: &str = "yarn";
-    pub const PACKAGE_JSON: &str = "package.json";
-
-    pub fn setup_environment(repo_dir: PathBuf) -> Result<(), Error> {
-        symlink_node_modules(repo_dir)?;
-
-        Command::new(YARN).output()?;
-
-        Ok(())
+    if runnable_files.is_empty() {
+        return Ok(());
     }
 
-    fn symlink_node_modules(repo_dir: PathBuf) -> Result<(), Error> {
-        let current_dir = current_dir()?;
-
-        symlink(
-            format!("{}/{NODE_MODULES}", repo_dir.display()),
-            format!("{}/{NODE_MODULES}", current_dir.display()),
-        )?;
-
-        Ok(())
+    if let Some(run) = &config.test.run {
+        for step in &run.steps {
+            Command::new(&step.command)
+                .args(step.args.as_deref().unwrap_or_default())
+                .args(&runnable_files)
+                .stderr(Stdio::null())
+                .spawn()?
+                .wait_with_output()?;
+        }
     }
+
+    Ok(())
 }

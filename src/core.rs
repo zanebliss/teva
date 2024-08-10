@@ -1,31 +1,35 @@
 use colored::*;
 use std::{
-    io::Error,
+    error::Error,
     process::{self, Command},
     sync::atomic::AtomicBool,
 };
 
 use crate::{
     git::{self, Client},
+    parser::Config,
     runners,
 };
 
-pub fn do_work(client: &Client, term: std::sync::Arc<AtomicBool>) -> Result<(), Error> {
+pub fn do_work(
+    client: &Client,
+    config: Config,
+    term: std::sync::Arc<AtomicBool>,
+) -> Result<(), Error> {
     let cached_files: Vec<String> = vec![];
-    let repo_dir = std::env::current_dir().unwrap();
 
     shutdown_if_no_work(client.commits.len());
 
-    setup_environment(&client, repo_dir)?;
+    setup_environment(&client, &config)?;
 
     for_each_commit_pair(client, cached_files, term, |cached_files| {
-        let _ = runners::ruby::tests::rspec::run(&cached_files);
+        runners::run(&config, &cached_files).unwrap();
     })?;
 
     Ok(())
 }
 
-fn setup_environment(client: &Client, repo_dir: std::path::PathBuf) -> Result<(), Error> {
+fn setup_environment(client: &Client, config: &Config) -> Result<(), Error> {
     print!("{} ⚙️ Setting up environment...", "[teva]".blue());
 
     client.create_worktree()?;
@@ -36,10 +40,9 @@ fn setup_environment(client: &Client, repo_dir: std::path::PathBuf) -> Result<()
         std::process::exit(1);
     }
 
-    runners::ruby::tests::rspec::setup_environment(repo_dir)?;
+    runners::setup(config)?;
 
-    print!(" Done ✔️\n");
-    println!("{}", "[teva]".blue());
+    print!("{} Done ✔️\n", "[teva]".blue());
 
     Ok(())
 }
