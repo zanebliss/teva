@@ -1,8 +1,8 @@
 use clap::Parser;
 use colored::*;
 use git::Client;
+use std::error::Error;
 use std::{
-    io::Error,
     path::Path,
     sync::{
         atomic::{AtomicBool, Ordering},
@@ -16,7 +16,7 @@ mod git;
 mod parser;
 mod runners;
 
-fn main() -> Result<(), Error> {
+fn main() -> Result<(), Box<dyn Error>> {
     let term = Arc::new(AtomicBool::new(false));
     let cli = Cli::parse();
     let root_commit = cli.commit.as_deref().unwrap_or(git::DEFAULT_COMMIT);
