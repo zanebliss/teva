@@ -1,5 +1,9 @@
 use colored::*;
-use std::{io::Error, process::{self, Command}, sync::atomic::AtomicBool};
+use std::{
+    io::Error,
+    process::{self, Command},
+    sync::atomic::AtomicBool,
+};
 
 use crate::{
     git::{self, Client},

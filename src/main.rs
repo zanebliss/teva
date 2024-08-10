@@ -12,6 +12,7 @@ use std::{
 mod core;
 mod display;
 mod git;
+mod parser;
 mod runners;
 
 fn main() -> Result<(), Error> {
