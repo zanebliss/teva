@@ -1,0 +1,4 @@
+[test]
+pattern = "_spec.rb"
+[test.run]
+steps = [ { name = "rspec", command = "bundle", args = ["exec", "rspec"] } ]

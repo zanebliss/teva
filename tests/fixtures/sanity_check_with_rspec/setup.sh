@@ -2,7 +2,7 @@
 
 echo "Setting up sanity_check_with_rspec fixture"
 echo "Copying files into temp dir $1..."
-rsync -r tests/fixtures/sanity_check_with_rspec/* $1 --exclude=setup.sh
+rsync -r tests/fixtures/sanity_check_with_rspec/ $1 --exclude=setup.sh
 echo "Done"
 
 echo "Installing dependencies..."
