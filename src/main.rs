@@ -1,4 +1,5 @@
 use clap::Parser;
+use colored::*;
 use git::Client;
 use std::{
     io::Error,
@@ -24,8 +25,8 @@ fn main() -> Result<(), Error> {
     while !term.load(Ordering::SeqCst) {
         match core::do_work(&client, term) {
             Err(err) => {
-                println!("\x1b[94m[TEVA]\x1b[0m Failed with error: {err}");
-                println!("\x1b[94m[TEVA]\x1b[0m Exiting...");
+                println!("{} Failed with error: {err}", "[teva]".red());
+                println!("{} Exiting...", "[teva]".red());
             }
             _ => {}
         }

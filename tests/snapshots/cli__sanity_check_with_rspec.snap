@@ -2,19 +2,19 @@
 source: tests/cli.rs
 expression: result
 ---
-[94m[TEVA][0m ⚙️ Setting up environment... Done ✔️
-[94m[TEVA][0m
-[94m[TEVA][0m [[SHA][0m add bar (1 of 3)
-[94m[TEVA][0m Changed files: bar.rb spec/bar_spec.rb
-[94m[TEVA][0m Running tests...
+[teva] ⚙️ Setting up environment... Done ✔️
+[teva]
+[teva] [SHA] add bar (1 of 3)
+[teva] Changed files: bar.rb spec/bar_spec.rb
+[teva] Running tests...
 .
 
 Finished in [TIME] seconds (files took [TIME] seconds to load)
 1 example, 0 failures
 
-[94m[TEVA][0m [[SHA][0m add baz (2 of 3)
-[94m[TEVA][0m Changed files: baz.rb spec/baz_spec.rb
-[94m[TEVA][0m Running tests...
+[teva] [SHA] add baz (2 of 3)
+[teva] Changed files: baz.rb spec/baz_spec.rb
+[teva] Running tests...
 .F
 
 Failures:
@@ -35,9 +35,9 @@ Failed examples:
 
 rspec ./spec/baz_spec.rb:5 # Baz is expected to eq 2
 
-[94m[TEVA][0m [[SHA][0m add fizz (3 of 3)
-[94m[TEVA][0m Changed files: fizz.rb spec/fizz_spec.rb
-[94m[TEVA][0m Running tests...
+[teva] [SHA] add fizz (3 of 3)
+[teva] Changed files: fizz.rb spec/fizz_spec.rb
+[teva] Running tests...
 .F.
 
 Failures:

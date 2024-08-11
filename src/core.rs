@@ -1,7 +1,7 @@
+use colored::*;
 use std::{io::Error, process, sync::atomic::AtomicBool};
 
 use crate::{
-    display,
     git::{self, Client},
     runners,
 };
@@ -22,7 +22,7 @@ pub fn do_work(client: &Client, term: std::sync::Arc<AtomicBool>) -> Result<(), 
 }
 
 fn setup_environment(client: &Client, repo_dir: std::path::PathBuf) -> Result<(), Error> {
-    print!("\x1b[94m[TEVA]\x1b[0m ⚙️ Setting up environment...");
+    print!("{} ⚙️ Setting up environment...", "[teva]".blue());
 
     client.create_worktree()?;
 
@@ -35,7 +35,7 @@ fn setup_environment(client: &Client, repo_dir: std::path::PathBuf) -> Result<()
     runners::ruby::tests::rspec::setup_environment(repo_dir)?;
 
     print!(" Done ✔️\n");
-    println!("\x1b[94m[TEVA]\x1b[0m");
+    println!("{}", "[teva]".blue());
 
     Ok(())
 }
@@ -57,8 +57,10 @@ where
         i += 1; // Start commit count at 1
 
         print!(
-            "\x1b[94m[TEVA]\x1b[0m \x1b[33m{}\x1b[0m {}",
-            &commit_pair[1].sha, &commit_pair[1].message
+            "{} {} {}",
+            "[teva]".blue(),
+            &commit_pair[1].sha.yellow(),
+            &commit_pair[1].message
         );
         print!(" ({i} of {})", client.commits.windows(2).len());
 
@@ -75,10 +77,11 @@ where
         client.checkout(&commit_pair[1].sha)?;
 
         println!(
-            "\n\x1b[94m[TEVA]\x1b[0m Changed files: {}",
-            changed_files.join(" ")
+            "\n{} Changed files: {}",
+            "[teva]".blue(),
+            changed_files.join(" "),
         );
-        println!("\x1b[94m[TEVA]\x1b[0m Running tests...");
+        println!("{} Running tests...", "[teva]".blue());
 
         runner_fn(&cached_files);
 

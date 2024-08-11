@@ -19,7 +19,7 @@ fn sanity_check_with_rspec() -> Result<(), Box<dyn std::error::Error>> {
 
     insta::with_settings!({ filters => vec![
         (r"\b\d*\.\d+\b", "[TIME]"),
-        (r"33m[a-z0-9]{7}", "[SHA]")
+        (r"\b[a-f0-9]{7}\b", "[SHA]")
     ]}, {
         insta::assert_snapshot!(result);
     });
