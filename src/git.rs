@@ -58,7 +58,12 @@ impl Client {
     }
 
     pub fn delete_worktree(&self) -> Result<(), Error> {
-        self.execute_command(vec!["worktree", "remove", &format!("/tmp/{WORKTREE_DIR}")]);
+        self.execute_command(vec![
+            "worktree",
+            "remove",
+            &format!("/private/tmp/{WORKTREE_DIR}"),
+            "--force",
+        ]);
 
         Ok(())
     }
