@@ -1,5 +1,5 @@
 use colored::*;
-use std::{io::Error, process, sync::atomic::AtomicBool};
+use std::{io::Error, process::{self, Command}, sync::atomic::AtomicBool};
 
 use crate::{
     git::{self, Client},
@@ -93,6 +93,10 @@ where
 
 pub fn cleanup(client: &Client) -> Result<(), Error> {
     client.delete_worktree()?;
+
+    Command::new("rm")
+        .args(["-rf", "/tmp/teva-worktree"])
+        .output()?;
 
     Ok(())
 }
