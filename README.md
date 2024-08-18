@@ -4,47 +4,46 @@
   <img alt="Teva logo" width="200" src="teva.png" />
 </p>
 
-> Adventure sandals for continuous commits.
+Teva is a CLI tool that makes it easier to maintain a git revision history by
+running tests for changed files on every commit of a branch. It creates a git
+worktree, checks out to each SHA, gets changed files, and passes them a test
+runner until reaching HEAD.
 
-Teva is a command line program that enables performing actions on a series of commits in a git repository, typically in a feature branch. It creates a separate worktree and checks out to every commit from `main` to `HEAD` and performs an action. Out of the box, Teva supports `bin/rails`, but other prebaked commands are coming.
+It includes signal handling for SIGNINT, the ability to define repository setup
+steps and test runners with a config file, and is isolated from the main
+worktree and any unstashed changes.
 
-Teva manages it's worktree in a separate directory, so it is idempotent and does not affect the "main worktree". It includes signal handling for SIGNINT to interrupt long-running processes, and it deletes the worktree after it's finished.
+Check out the blog post introducing it
+[here](https://zanebliss.github.io/blog/rusty-revisions).
 
 ## Installation
 
-The executable is not available via package managers, but installation is simple by downloading the executable from the releases and installing it manually.
+### Download the binary
 
-After selecting the executable that matches the platform architecture, you can rename it to `teva`.
-
-```bash
-mv <some_path>/teva-arm64 <some_path>/teva
-```
-
-### Locally
+#### Locally
 If you only want the executable available from a specific directory, download the executable and copy it to the desired directory.
 
 ```bash
-cp <some_path>/teva my_directory/bin
-cd my_directory
-./teva
+curl -L -o {project-dir}/bin/teva https://github.com/zanebliss/teva/releases/download/v1.0/teva-{architecture}
+chmod u+x {project-dir}/bin/teva
 ```
 
-### Adding executable to `PATH`
+#### Putting it in  `PATH`
 Another option is to place the executable in an accessible directory such as `~/bin`, then export that directory to your `PATH`.  The example below uses `.zshrc`.
 
 ```bash
-cp <some_path>/teva ~/bin
-echo 'export PATH=$PATH:~/bin' >> ~/.zshrc
+mkdir ~/.local/bin
+curl -L -o ~/.local/bin/teva https://github.com/zanebliss/teva/releases/download/v1.0/teva-{architecture}
+chmod u+x ~/.local/bin/teva
+echo 'export PATH=$PATH:~/.local/bin' >> ~/.zshrc
 source ~/.zshrc
-teva
 ```
 
-### Adding executable to `/usr/local/bin`
-Another option is to add the executable to `/usr/local/bin`. Note, this may require root privileges.
+#### Adding executable to `/usr/local/bin`
+Another option is to add the executable to `/usr/local/bin`. Note, this will likely require `sudo`.
 ```bash
-sudo cp <some_path>/teva /usr/local/bin
-source /usr/local/bin
-teva
+curl -L -o /usr/local/bin https://github.com/zanebliss/teva/releases/download/v1.0/teva-{architecture}
+chmod u+x /usr/local/bin/teva
 ```
 
 ## Platforms
