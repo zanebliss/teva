@@ -43,7 +43,7 @@ fn setup_environment(client: &Client, config: &Config) -> Result<(), Box<dyn Err
 
     runners::setup(config)?;
 
-    print!("{} Done ✔️\n", "[teva]".blue());
+    print!(" Done ✔️\n");
 
     Ok(())
 }
