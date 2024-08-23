@@ -47,14 +47,12 @@ pub fn run(config: &Config, cached_files: &Vec<String>) -> Result<(), Box<dyn Er
     }
 
     if let Some(run) = &config.test.run {
-        for step in &run.steps {
-            Command::new(&step.command)
-                .args(step.args.as_deref().unwrap_or_default())
-                .args(&runnable_files)
-                .stderr(Stdio::null())
-                .spawn()?
-                .wait_with_output()?;
-        }
+        Command::new(&run.command)
+            .args(run.args.as_deref().unwrap_or_default())
+            .args(&runnable_files)
+            .stderr(Stdio::null())
+            .spawn()?
+            .wait_with_output()?;
     }
 
     Ok(())

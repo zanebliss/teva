@@ -21,7 +21,8 @@ pub struct Setup {
 
 #[derive(Debug, Deserialize)]
 pub struct Run {
-    pub steps: Vec<Step>,
+    pub command: String,
+    pub args: Option<Vec<String>>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -63,9 +64,9 @@ mod tests {
                 ]
 
                 [test.run]
-                steps = [
-                    { name = "rspec", command = "bundle", args = ["exec", "rspec" ] },
-                ]
+                name = "rspec"
+                command = "bundle"
+                args = ["exec", "rspec"]
                 "#;
             writeln!(tmp_file, "{}", toml)?;
 
@@ -75,7 +76,7 @@ mod tests {
 
             let result = config?;
             let test = result.test.setup.unwrap().steps;
-            let run = result.test.run.unwrap().steps;
+            let run = result.test.run.unwrap();
 
             assert_eq!("_spec.rb", result.test.pattern);
             assert_eq!(2, test.len());
@@ -87,11 +88,10 @@ mod tests {
                 test.get(1).unwrap().args.clone().unwrap()
             );
 
-            assert_eq!(1, run.len());
-            assert_eq!("bundle", run.first().unwrap().command);
+            assert_eq!("bundle", run.command);
             assert_eq!(
                 ["exec".to_string(), "rspec".to_string()].to_vec(),
-                run.first().unwrap().args.clone().unwrap()
+                run.args.clone().unwrap()
             );
 
             Ok(())
