@@ -1,7 +1,7 @@
 use colored::*;
 use std::{
     error::Error,
-    process::{self, Command},
+    process::{self},
     sync::atomic::AtomicBool,
 };
 
@@ -32,6 +32,7 @@ pub fn do_work(
 fn setup_environment(client: &Client, config: &Config) -> Result<(), Box<dyn Error>> {
     print!("{} ⚙️ Setting up environment...", "[teva]".blue());
 
+    client.delete_worktree()?;
     client.create_worktree()?;
 
     if std::env::set_current_dir(&format!("/tmp/{}", git::WORKTREE_DIR).to_string()).is_err() {
@@ -100,10 +101,6 @@ where
 
 pub fn cleanup(client: &Client) -> Result<(), Box<dyn Error>> {
     client.delete_worktree()?;
-
-    Command::new("rm")
-        .args(["-rf", "/tmp/teva-worktree"])
-        .output()?;
 
     Ok(())
 }
