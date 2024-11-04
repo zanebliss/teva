@@ -2,6 +2,6 @@
 
 ## [Unreleased]
 
-## [1.0] - 2024-8-18
+## [0.1] - 2024-11-04
 
 Initial release.

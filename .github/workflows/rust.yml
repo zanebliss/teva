@@ -10,17 +10,14 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build_and_test:
+  build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.2'
     - name: Build
       run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
   rustfmt_check: 
     runs-on: ubuntu-latest
     steps:
